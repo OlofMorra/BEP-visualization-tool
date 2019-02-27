@@ -1,0 +1,21 @@
+* {
+  box-sizing: border-box;
+}
+
+.main-body {
+  width: 100%;
+  float:left;
+}
+
+.main-sidebar {
+  width: 20%;
+  float:left;
+  display: block;
+  background-color: yellow;
+  height: 500px;
+}
+
+.main-content {
+  width:60%;
+  float:left;
+}
