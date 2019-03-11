@@ -1,21 +1,33 @@
-* {
-  box-sizing: border-box;
+#main-body {
+    display: grid;
+    grid-template-columns: 250px auto 250px;
+    grid-column-gap: 10px;
+    grid-template-rows: 50px;
+    grid-row-gap: 10px;
 }
 
-.main-body {
-  width: 100%;
-  float:left;
+.input-panel {
+    background-color: #f9a800;
+    grid-row-end: span 12;
+    padding: 8px;
 }
 
-.main-sidebar {
-  width: 20%;
-  float:left;
-  display: block;
-  background-color: yellow;
-  height: 500px;
+.input-panel H1 {
+    grid-row-start: 1;
+    grid-row-end: 3;
+    text-align: center;
+    font-family: "Palatino", "Georgia", "Verdana", "Helvetica";
+    font-size: 22px;
 }
 
-.main-content {
-  width:60%;
-  float:left;
+.upload-data {
+    grid-row-start:4;
+    grid-row-end: 6;
+    line-height: 60px;
+    border-width: 1px;
+    border-style: dashed;
+    border-radius: 5px;
+    text-align: center;
+    margin: 10px;
+    cursor: pointer;
 }
