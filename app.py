@@ -2,14 +2,14 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import dash_table
 
 import plotly.plotly as py
 import plotly.graph_objs as go
 
 import pandas as pd
 import base64
-import datetime
 import io
 
 import networkx as nx
@@ -28,15 +28,6 @@ app.layout = html.Div(id='main-body', children=[
                 {'label': 'XLS', 'value': 'xls'}
             ],
             value='csv'
-        ),
-        html.P('Select split character'),
-        dcc.Dropdown(id="dropdown-splittype",
-            options=[
-                {'label': 'Space', 'value': ' '},
-                {'label': ',', 'value': ','},
-                {'label': "Tab", 'value': '\t'}
-            ],
-            value=' '
         ),
         dcc.Upload(
             id='upload-field',
@@ -58,35 +49,44 @@ app.layout = html.Div(id='main-body', children=[
     )
 ])
 
+# Functions
+def parse_contents(contents, filetype, filename):
+    # If we want to give the option to upload multiple files
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing ' + filename + '. The given '
+            'error is ' + str(e) + '.'
+        ])
+
+    return
 
 # Callback functions; functions that execute when something is changed
 @app.callback(Output('head-data-upload', 'children'),
               [Input('upload-field', 'contents'),
-               Input('dropdown-splittype', 'value'),
                Input('dropdown-filetype', 'value')],
+               [State('upload-field', 'filename')]
               )
-def load_data(content, split, filetype):
-    if (content == None):
-        return html.Div([
-            'Select a data file.'
-        ])
-    elif (split == None):
-        return html.Div([
-            'Select a split character.'
-        ])
-    elif (filetype == None):
-        return html.Div([
-            'Select a filetype.'
-        ])
-    else:
-        return html.Div([
-            'Loaded' + content['name']
-        ])
+def load_data(content, filetype, name):
+    if content is not None:
+        children = [
+            parse_contents(content, filetype, name)]
+        return children
 
-    if filetype == 'csv':
-        df = pd.read_csv(content)
-    elif filetype == 'xls':
-        df = pd.read_excel(content)
+    return html.Div([
+        'There was no file uploaded'
+    ])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
