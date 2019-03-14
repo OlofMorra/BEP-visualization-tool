@@ -18,9 +18,6 @@ app = dash.Dash(__name__)
 
 df = None
 
-def freek():
-    return 'dit'
-
 app.layout = html.Div(id='main-body', children=[
     html.Div(className='input-panel', children=[
         html.H1('Input panel'),
