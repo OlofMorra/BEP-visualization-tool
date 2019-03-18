@@ -8,4 +8,4 @@ pandas
 datetime
 dash-renderer
 plotly
-networkx
+networkx==2.2
