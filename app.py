@@ -29,10 +29,13 @@ df2 = pd.DataFrame({'source': [random.randint(1, 10) for _ in range(10)],
 G2 = nx.DiGraph(df2)
 datasets = [df1, df2]
 
-algorithm_types = ['Shortest path', 'Minimal spanning tree', 'Matching']
-algorithms_per_type = {'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
-                       'Minimal spanning tree': ['Kruskal', 'Prim'],
-                       'Matching': ['Ford-Fulkerson']}
+# structure: {algorithm type: {algorithm: [html structure]}}
+algorithms = {
+    'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
+    'Minimal spanning tree': ['Kruskal', 'Prim'],
+    'Matching': ['Ford-Fulkerson'],
+    'Test': ['temp_func']
+}
 
 
 # APP LAYOUT
@@ -43,12 +46,12 @@ app.layout = html.Div(id='main-body', children=[
         html.H1('Input panel'),
         html.P('Select file type'),
         dcc.Dropdown(id="dropdown-filetype",
-            options=[
-                {'label': 'CSV', 'value': 'csv'},
-                {'label': 'XLS', 'value': 'xls'}
-            ],
-            value='csv'
-        ),
+                     options=[
+                         {'label': 'CSV', 'value': 'csv'},
+                         {'label': 'XLS', 'value': 'xls'}
+                     ],
+                     value='csv'
+                     ),
         dcc.Upload(
             id='upload-field',
             className='upload-data',
@@ -63,21 +66,44 @@ app.layout = html.Div(id='main-body', children=[
 
         # Algorithm selection
         html.Hr(),
+        html.H1('Algorithm settings'),
+        html.P('Select dataset'),
+        dcc.Dropdown(id='dijkstra-graph-dropdown'),
         html.P('Select algorithm type'),
         dcc.Dropdown(
             id="algorithm-type-dropdown",
-            options=[{'label': x, 'value': x} for x in algorithm_types],
-            value=algorithm_types[0]
+            options=[{'label': x, 'value': x} for x in algorithms.keys()],
+            value=[x for x in algorithms.keys()][0]  # dumb workaround; dict.keys() doesn't support indexing
         ),
         html.P('Select algorithm to run'),
         dcc.Dropdown(id='algorithm-dropdown'),
-        # Algorithm settings: everything present; will be filled in when necessary with callbacks
-        html.P('Settings'),
+        # Algorithm settings: everything present from the beginning and will be filled in when necessary with callbacks
+        html.H3('Settings'),
         html.Div(id='algorithm-settings', children=[
-            html.Div(id='dijkstra-settings'),
-            html.Div(id='temp_func-settings')
+            # Dijkstra
+            html.Div(id='dijkstra-settings', style={'display': 'none'}, children=[
+                html.P('Select start node'),
+                dcc.Dropdown(id='dijkstra-start-dropdown'),
+                html.P('Select weight column'),
+                dcc.Dropdown(id='dijkstra-weight-dropdown'),
+                html.Button(id='dijkstra-run-button', children='Run algorithm')
+            ]),
+            # Bellman-Ford
+            html.Div(id='bellman-ford-settings', style={'display': 'none'}, children=[]),
+            # Floyd Warshall
+            html.Div(id='floyd-warshall-settings', style={'display': 'none'}, children=[]),
+            # Kruskal
+            html.Div(id='kruskal-settings', style={'display': 'none'}, children=[]),
+            # Prim
+            html.Div(id='prim-settings', style={'display': 'none'}, children=[]),
+            # Ford-Fulkerson
+            html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[]),
+            # Test
+            html.Div(id='test-settings', style={'display': 'none'}, children=[
+                dcc.Input(id='temp_func-func_name-input'),
+                dcc.Dropdown(id='temp_func-start-dropdown')
+            ])
         ]),
-        html.Button('Run algorithm', id='run-algorithm-button')
     ]),
 
     # VISUAL ANALYTICS PANEL
@@ -111,7 +137,7 @@ def parse_contents(contents, filetype, filename):
         print(e)
         return html.Div([
             'There was an error processing ' + filename + '. The given '
-            'error is ' + str(e) + '.'
+                                                          'error is ' + str(e) + '.'
         ])
 
     return
@@ -121,7 +147,7 @@ def parse_contents(contents, filetype, filename):
 @app.callback(Output('head-data-upload', 'children'),
               [Input('upload-field', 'contents'),
                Input('dropdown-filetype', 'value')],
-               [State('upload-field', 'filename')]
+              [State('upload-field', 'filename')]
               )
 def load_data(content, filetype, name):
     if content is not None:
@@ -137,12 +163,63 @@ def load_data(content, filetype, name):
 @app.callback(Output('algorithm-dropdown', 'options'),
               [Input('algorithm-type-dropdown', 'value')])
 def set_algorithm_options(selected_type):
-    return [{'label': x, 'value': x} for x in algorithms_per_type[selected_type]]
+    return [{'label': x, 'value': x} for x in algorithms[selected_type]]
 
 @app.callback(Output('algorithm-dropdown', 'value'),
               [Input('algorithm-dropdown', 'options')])
 def set_algorithm_value(available_options):
     return available_options[0]['value']
+
+@app.callback([Output('dijkstra-settings', 'style'),
+               Output('bellman-ford-settings', 'style'),
+               Output('floyd-warshall-settings', 'style'),
+               Output('kruskal-settings', 'style'),
+               Output('prim-settings', 'style'),
+               Output('ford-fulkerson-settings', 'style'),
+               Output('test-settings', 'style')],
+              [Input('algorithm-dropdown', 'value')])
+def show_settings(selected_algorithm):
+    result_dict = {x: {'display': 'none'} for y in algorithms.values() for x in y}  # hide all divs
+    result_dict[selected_algorithm] = {}  # remove the selected algorithm's div's style settings
+    return [x for x in result_dict.values()]
+
+# TODO account for possible changes in Graph object
+@app.callback(Output('dijkstra-start-dropdown', 'options'),
+              [Input('dijkstra-settings', 'style')])
+def set_dijkstra_start_options(style):
+    if 'display' in style.keys() and style['display'] == 'none':
+        return []
+    else:
+        # TODO fix graph/dataset met callbacks
+        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
+
+@app.callback(Output('dijkstra-start-dropdown', 'value'),
+              [Input('dijkstra-start-dropdown', 'options')])
+def set_dijkstra_start_value(options):
+    if len(options) > 0:
+        return options[0]['value']
+    else:
+        return ''
+
+@app.callback(Output('dijkstra-weight-dropdown', 'options'),
+              [Input('dijkstra-settings', 'style')])
+def set_dijkstra_weight_options(style):
+    if 'display' in style.keys() and style['display'] == 'none':
+        return []
+    else:
+        # TODO fix graph/dataset met callbacks
+        return [{'label': x, 'value': x} for x in df1.columns]
+
+@app.callback(Output('dijkstra-weight-dropdown', 'value'),
+              [Input('dijkstra-weight-dropdown', 'options')])
+def set_dijkstra_start_value(options):
+    if len(options) > 0:
+        if 'weight' in [x['value'] for x in options]:
+            return 'weight'
+        else:
+            return options[0]['value']
+    else:
+        return ''
 
 
 if __name__ == '__main__':

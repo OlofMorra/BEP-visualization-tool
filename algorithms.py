@@ -22,7 +22,6 @@ def temp_func(func_name:str, start:int):
     print(temp_func.__code__.co_varnames)
 
 
-
 def dijkstra(G:nx.Graph, start:int, weight:str= "weight"):
     """Implementation of Dijkstra's shortest path algorithm to find shortest weighted paths from source to all other
     nodes graph G.
