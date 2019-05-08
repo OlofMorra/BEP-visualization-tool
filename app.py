@@ -5,6 +5,7 @@ import dash_html_components as html
 import dash_cytoscape as cyto
 from dash.dependencies import Input, Output, State
 import dash_table
+from dash.exceptions import PreventUpdate
 import plotly.plotly as py
 import plotly.graph_objs as go
 
@@ -13,6 +14,7 @@ import base64
 import io
 import random
 import json
+import itertools as it
 
 import networkx as nx
 from algorithms import dijkstra, temp_func
@@ -40,6 +42,8 @@ algorithms = {
 
 network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'random']
 
+app.config['suppress_callback_exceptions'] = True
+
 
 # APP LAYOUT
 app.layout = html.Div(id='main-body', children=[
@@ -47,24 +51,30 @@ app.layout = html.Div(id='main-body', children=[
     html.Div(className='input-panel', children=[
         # Data loading
         html.H1('Input panel'),
-        html.P('Select file type'),
-        dcc.Dropdown(id="dropdown-filetype",
-                     options=[
-                         {'label': 'CSV', 'value': 'csv'},
-                         {'label': 'XLS', 'value': 'xls'}
-                     ],
-                     value='csv'
-                     ),
+        html.Div('Supported file types are csv, json, '
+                 'xls, dta, xpt and pkl.'),
+
         dcc.Upload(
             id='upload-field',
             className='upload-data',
-            children=html.Div([
-                'Drag and Drop or ',
-                html.A('Select Files')
-            ]),
-            # Do not allow multiple files to be uploaded
-            multiple=False
+            children=[html.Div(['Drag and Drop or ',
+                                html.A('Select Files')
+                                ]),
+                      html.Div(id='upload-message')],
+            # Do allow multiple files to be uploaded
+            multiple=True
         ),
+        html.Button('Click to store in memory', id='memory-button'),
+        html.Div(id='test'),
+        dcc.Store(id='dataset1', storage_type='memory'),
+        dcc.Store(id='dataset2', storage_type='memory'),
+        dcc.Store(id='dataset3', storage_type='memory'),
+        dcc.Store(id='dataset4', storage_type='memory'),
+        dcc.Store(id='dataset5', storage_type='memory'),
+        # Storage components for datasets
+        html.Div(id='datasets', children=[
+            html.Div(id='nr-of-datasets', children='0', style={'display': 'none'})
+        ]),
         html.Div(id='head-data-upload'),
 
         # Algorithm selection
@@ -151,20 +161,95 @@ def parse_contents(contents, filetype, filename):
 #########################
 # INPUT PANEL CALLBACKS #
 #########################
-@app.callback(Output('head-data-upload', 'children'),
-              [Input('upload-field', 'contents'),
-               Input('dropdown-filetype', 'value')],
+def validate_dataset(i, contents, filename):
+    df = []
+    # Splitting at start of file for content type and the actual data
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+
+    # Select last 5 characters from filename as extension is in there
+    file_type = filename[-5:]
+
+    try:
+        if 'csv' in file_type:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep=" ")
+        elif 'json' in file_type:
+            # Assume that the user uploaded a JSON file
+            df = pd.read_json(io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in file_type:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+        elif 'dta' in file_type:
+            # Assume that the user uploaded an stata data file
+            df = pd.read_stata(io.BytesIO(decoded))
+        elif 'xpt' in file_type:
+            # Assume that the user uploaded an SAS file
+            df = pd.read_stata(io.BytesIO(decoded))
+        elif 'pkl' in file_type:
+            # Assume that the user uploaded an python pickle file
+            df = pd.read_pickle(io.BytesIO(decoded))
+        else:
+            raise Exception('File format is not supported ')
+
+    except Exception as e:
+        return html.Div([
+            'There was an error processing ' + filename +
+            '. ' + str(e) + '.'
+        ]), None
+
+    data = df.to_dict()
+
+    return html.Div(['Upload of ' + filename + ' (dataset ' + str(i) + ' was successful.']), data
+
+# Callback functions; functions that execute when something is changed
+@app.callback([Output('dataset1', 'data')],
+              [Input('upload-field', 'contents')],
               [State('upload-field', 'filename')]
               )
-def load_data(content, filetype, name):
-    if content is not None:
-        children = [
-            parse_contents(content, filetype, name)]
-        return children
+def load_data(contents, names):
+    childrenUplMess = list()
+    datasets = list()
+    count = 0
 
-    return html.Div([
-        'There was no file uploaded'
-    ])
+    if contents is None:
+        raise PreventUpdate
+
+    if contents is not None:
+        for i, (dataset, name) in enumerate(zip(it.islice(contents, 5), it.islice(names, 5))):
+            child, data = validate_dataset(i, dataset, name)
+            childrenUplMess.extend([child])
+            datasets.extend([data])
+            count += 1
+
+        for j in range(count, 5):
+            datasets.extend([{}])
+
+        print(type(datasets[0]))
+        print(type(datasets[1]))
+        print(type(datasets[2]))
+        print(type(datasets[3]))
+        print(type(datasets[4]))
+        print(type(datasets))
+        return datasets[0]
+            #, datasets[1], datasets[2], datasets[3], datasets[4]
+
+    try:
+        return {}, {}, {}, {}, {}
+    except Exception as e:
+        print(e)
+
+@app.callback(Output('test', 'children'),
+                  [Input('memory-button', 'n_clicks')],
+                  [State('dataset1', 'data')])
+def on_click(n_clicks, data):
+    if n_clicks is None:
+        # Preventing the None callbacks is important with the store component,
+        # you don't want to update the store for nothing.
+        raise PreventUpdate
+
+    return html.Div(str(data) + str(n_clicks))
 
 # Algorithm selection callbacks
 @app.callback(Output('algorithm-dropdown', 'options'),
