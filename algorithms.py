@@ -75,6 +75,6 @@ class Dijkstra:
                     heappush(Q, (dist[v], v))
 
                 t_elapsed = time.time() - t_start
-                memory_used = self.get_memory_used(Q, dist, prev, neighs_u)
+                memory_used = self.get_memory_used(self.G, Q, dist, prev, neighs_u)
                 yield memory_used, t_elapsed, Q, u, neighs_u, dist, prev
         # return dist, prev

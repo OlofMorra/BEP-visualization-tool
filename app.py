@@ -91,10 +91,13 @@ app.layout = html.Div(id='main-body', children=[
         html.P('Select algorithm to run'),
         dcc.Dropdown(id='algorithm-dropdown'),
         # Algorithm settings: everything present from the beginning and will be filled in when necessary with callbacks
-        html.H3('Settings'),
         html.Div(id='algorithm-settings', children=[
+            dcc.ConfirmDialog(
+                    id='settings-missing-dialog',
+                    message='Please select a value for all settings'),
             # Dijkstra
             html.Div(id='dijkstra-settings', style={'display': 'none'}, children=[
+                html.H3('Settings'),
                 html.P('Select start node'),
                 dcc.Dropdown(id='dijkstra-start-dropdown'),
                 html.P('Edge weights:'),
@@ -109,23 +112,29 @@ app.layout = html.Div(id='main-body', children=[
                 html.Button(id='dijkstra-run-button', n_clicks=0, children='Run algorithm', type='submit')
             ]),
             # Bellman-Ford
-            html.Div(id='bellman-ford-settings', style={'display': 'none'}, children=[]),
+            html.Div(id='bellman-ford-settings', style={'display': 'none'}, children=[
+                html.H3('Settings'),
+            ]),
             # Floyd Warshall
-            html.Div(id='floyd-warshall-settings', style={'display': 'none'}, children=[]),
+            html.Div(id='floyd-warshall-settings', style={'display': 'none'}, children=[
+                html.H3('Settings'),]),
             # Kruskal
-            html.Div(id='kruskal-settings', style={'display': 'none'}, children=[]),
+            html.Div(id='kruskal-settings', style={'display': 'none'}, children=[
+                html.H3('Settings'),]),
             # Prim
-            html.Div(id='prim-settings', style={'display': 'none'}, children=[]),
+            html.Div(id='prim-settings', style={'display': 'none'}, children=[
+                html.H3('Settings'),]),
             # Ford-Fulkerson
-            html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[])
+            html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[
+                html.H3('Settings'),])
         ]),
     ]),
 
     # VISUAL ANALYTICS PANEL
     html.Div(className='vis-panel', children=[
-        html.H1('Visual analytics panel', style={'display': 'inline-block'}),
+        html.H1('Visual analytics panel'),
         dcc.Dropdown(id='show-graphs-dropdown', multi=True,
-                     style={'width': '70%', 'display': 'inline-block', 'vertical-align': 'middle', 'textAlign': 'right'}),
+                     style={'vertical-align': 'middle'}),
         html.Div(id='shown-vis-graphs')
     ]),
 
@@ -151,7 +160,9 @@ app.layout = html.Div(id='main-body', children=[
 ])
 
 
-# FUNCTIONS
+#############
+# FUNCTIONS #
+#############
 def validate_dataset(i, contents, filename):
     df = []
     # Splitting at start of file for content type and the actual data
@@ -192,6 +203,7 @@ def validate_dataset(i, contents, filename):
 
     return html.Div(['Upload of ' + filename + ' was successful.']), df.to_dict('records')
 
+
 #########################
 # INPUT PANEL CALLBACKS #
 #########################
@@ -230,16 +242,36 @@ def load_data(contents, names):
     except Exception as e:
         print(e)
 
+
+@app.callback(Output('settings-missing-dialog', 'displayed'),
+              [Input('dijkstra-run-button', 'n_clicks')],
+              [State('dijkstra-start-dropdown', 'value'), State('dijkstra-weight-dropdown', 'value'),
+               State('dataset-dropdown', 'value')])
+def display_settings_reminder(n_clicks, start, weight, df_name):
+    if n_clicks > 0 and None in (start, weight, df_name):
+        return True
+    else:
+        return False
+
+
 # Algorithm selection callbacks
 @app.callback(Output('algorithm-dropdown', 'options'),
               [Input('algorithm-type-dropdown', 'value')])
 def set_algorithm_options(selected_type):
-    return [{'label': x, 'value': x} for x in algorithms[selected_type]]
+    if selected_type is None:
+        return []
+    else:
+        return [{'label': x, 'value': x} for x in algorithms[selected_type]]
+
 
 @app.callback(Output('algorithm-dropdown', 'value'),
               [Input('algorithm-dropdown', 'options')])
 def set_algorithm_value(available_options):
-    return available_options[0]['value']
+    if available_options is None or len(available_options) == 0:
+        return None
+    else:
+        return available_options[0]['value']
+
 
 @app.callback([Output('dijkstra-settings', 'style'),
                Output('bellman-ford-settings', 'style'),
@@ -249,8 +281,10 @@ def set_algorithm_value(available_options):
                Output('ford-fulkerson-settings', 'style')],
               [Input('algorithm-dropdown', 'value')])
 def show_settings(selected_algorithm):
-    result_dict = {x: {'display': 'none'} for y in algorithms.values() for x in y}  # hide all divs
-    result_dict[selected_algorithm] = {}  # remove the selected algorithm's div's style settings
+    alg_names = [x for y in algorithms.values() for x in y]
+    result_dict = {x: {'display': 'none'} for x in alg_names}  # hide all divs
+    if selected_algorithm in alg_names:
+        result_dict[selected_algorithm] = {}  # remove the selected algorithm's div's style settings
     return [x for x in result_dict.values()]
 
 
@@ -265,13 +299,15 @@ def set_dijkstra_start_options(style):
         # TODO fix graph/dataset met callbacks
         return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
 
+
 @app.callback(Output('dijkstra-start-dropdown', 'value'),
               [Input('dijkstra-start-dropdown', 'options')])
 def set_dijkstra_start_value(options):
     if len(options) > 0:
         return options[0]['value']
     else:
-        return ''
+        return None
+
 
 @app.callback(Output('dijkstra-weight-dropdown', 'options'),
               [Input('dijkstra-settings', 'style')])
@@ -325,13 +361,14 @@ def append_new_graph(current_graphs, name, data, xlab, ylab):
         current_graphs.append(graph)
         return current_graphs
 
+
 @app.callback(Output('saved-vis-graphs', 'children'),
               [Input('dijkstra-run-button', 'n_clicks')],
               [State('dijkstra-start-dropdown', 'value'), State('dijkstra-weight-dropdown', 'value'),
                State('dataset-dropdown', 'value'), State('saved-vis-graphs', 'children'),
                State('dijkstra-weight-radio', 'value')])
 def run_dijkstra(n_clicks, start, weight, df_name, current_graphs, use_weight_column):
-    if n_clicks > 0:
+    if n_clicks > 0 and None not in (start, weight, df_name):
         df = datasets[df_name]
 
         if use_weight_column == 'no':
@@ -343,21 +380,21 @@ def run_dijkstra(n_clicks, start, weight, df_name, current_graphs, use_weight_co
         time = []
         memory_use = []
 
-        for t, memory, Q, u, neighs_u, dist, prev in dijkstra:
+        for memory, t, Q, u, neighs_u, dist, prev in dijkstra:
             time.append(t)
             memory_use.append(memory/1000000)  # in megabytes
             result = dist, prev
 
         current_graphs = append_new_graph(
             current_graphs,
-            name='Alg:dijkstra | Data:{} | Run:'.format(df_name),
+            name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(df_name),
             data=[{'x': [i for i in range(len(time))], 'y': time, 'type': 'bar', 'name': 'SF'}],
             xlab='iteration number',
             ylab='time (s)'
         )
         current_graphs = append_new_graph(
             current_graphs,
-            name='Alg:dijkstra | Data:{} | Run:'.format(df_name),
+            name='Alg:dijkstra | Data:{} | Type:Memory | Run:'.format(df_name),
             data=[{'x': [i for i in range(len(memory_use))], 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
             xlab='iteration number',
             ylab='memory (MB)'
