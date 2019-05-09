@@ -18,7 +18,7 @@ import itertools as it
 import sys
 
 import networkx as nx
-from algorithms import dijkstra
+from algorithms import Dijkstra
 
 app = dash.Dash(__name__)
 
