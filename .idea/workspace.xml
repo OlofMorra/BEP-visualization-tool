@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="560">
-              <caret line="395" column="27" lean-forward="true" selection-start-line="395" selection-start-column="27" selection-end-line="395" selection-end-column="27" />
+            <state relative-caret-position="215">
+              <caret line="101" column="57" selection-start-line="101" selection-start-column="57" selection-end-line="101" selection-end-column="57" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -252,7 +250,7 @@
       <workItem from="1557145330640" duration="3332000" />
       <workItem from="1557221017147" duration="17622000" />
       <workItem from="1557386091955" duration="3064000" />
-      <workItem from="1557392972358" duration="3709000" />
+      <workItem from="1557392972358" duration="4045000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
@@ -324,11 +322,18 @@
       <option name="project" value="LOCAL" />
       <updated>1557392833419</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings.">
+      <created>1557397011371</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1557397011371</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="77301000" />
+    <option name="totallyTimeSpent" value="77637000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -426,7 +431,8 @@
     <MESSAGE value="Algorithm selection callbacks set up&#10;&#10;Two dropdown menus added: one for algorithm type, one for specific algorithm.&#10;When selecting an algorithm type, the second drop down menu only shows&#10;algorithms of that type." />
     <MESSAGE value="Upload component&#10;&#10;Robust upload component that can handle csv, pickle, json, xpt, xls and dta files. At most five datasets can be uploaded, which are stored in five separate dash Store components. Input template is needed momentarily, as there is no check for correct format in file." />
     <MESSAGE value="requirements.txt: cytoscape added" />
-    <option name="LAST_COMMIT_MESSAGE" value="requirements.txt: cytoscape added" />
+    <MESSAGE value="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings." />
+    <option name="LAST_COMMIT_MESSAGE" value="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/assets/style.css">
@@ -459,8 +465,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="560">
-          <caret line="395" column="27" lean-forward="true" selection-start-line="395" selection-start-column="27" selection-end-line="395" selection-end-column="27" />
+        <state relative-caret-position="215">
+          <caret line="101" column="57" selection-start-line="101" selection-start-column="57" selection-end-line="101" selection-end-column="57" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>
