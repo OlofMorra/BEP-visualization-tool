@@ -136,31 +136,6 @@ app.layout = html.Div(id='main-body', children=[
 
 
 # FUNCTIONS
-def parse_contents(contents, filetype, filename):
-    # If we want to give the option to upload multiple files
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-
-    try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
-    except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing ' + filename + '. The given '
-                                                          'error is ' + str(e) + '.'
-        ])
-
-    return
-
-#########################
-# INPUT PANEL CALLBACKS #
-#########################
 def validate_dataset(i, contents, filename):
     df = []
     # Splitting at start of file for content type and the actual data
@@ -199,12 +174,17 @@ def validate_dataset(i, contents, filename):
             '. ' + str(e) + '.'
         ]), None
 
-    data = df.to_dict()
+    return html.Div(['Upload of ' + filename + ' (dataset ' + str(i) + ' was successful.']), df.to_dict('records')
 
-    return html.Div(['Upload of ' + filename + ' (dataset ' + str(i) + ' was successful.']), data
-
+#########################
+# INPUT PANEL CALLBACKS #
+#########################
 # Callback functions; functions that execute when something is changed
-@app.callback([Output('dataset1', 'data')],
+@app.callback([Output('dataset1', 'data'),
+               Output('dataset2', 'data'),
+               Output('dataset3', 'data'),
+               Output('dataset4', 'data'),
+               Output('dataset5', 'data')],
               [Input('upload-field', 'contents')],
               [State('upload-field', 'filename')]
               )
@@ -226,14 +206,7 @@ def load_data(contents, names):
         for j in range(count, 5):
             datasets.extend([{}])
 
-        print(type(datasets[0]))
-        print(type(datasets[1]))
-        print(type(datasets[2]))
-        print(type(datasets[3]))
-        print(type(datasets[4]))
-        print(type(datasets))
-        return datasets[0]
-            #, datasets[1], datasets[2], datasets[3], datasets[4]
+        return datasets[0], datasets[1], datasets[2], datasets[3], datasets[4]
 
     try:
         return {}, {}, {}, {}, {}
