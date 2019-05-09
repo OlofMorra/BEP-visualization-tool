@@ -80,8 +80,8 @@ app.layout = html.Div(id='main-body', children=[
         html.H1('Algorithm settings'),
         html.P('Select dataset'),
         dcc.Dropdown(id='dataset-dropdown',
-                     options=[{'label': 'df1', 'value': 'df1'}, {'label': 'df2', 'value': 'df2'}],
-                     value='df1'),
+                     options=[],
+                     value=''),
         html.P('Select algorithm type'),
         dcc.Dropdown(
             id="algorithm-type-dropdown",
@@ -201,11 +201,13 @@ def validate_dataset(i, contents, filename):
                Output('dataset2', 'data'),
                Output('dataset3', 'data'),
                Output('dataset4', 'data'),
-               Output('dataset5', 'data')],
+               Output('dataset5', 'data'),
+               Output('dataset-dropdown', 'options'),
+               Output('dataset-dropdown', 'value')],
               [Input('upload-field', 'contents')],
               [State('upload-field', 'filename')]
               )
-def load_data(contents, names):
+def load_data(contents, filenames):
     childrenUplMess = list()
     datasets = list()
     count = 0
@@ -214,21 +216,21 @@ def load_data(contents, names):
         raise PreventUpdate
 
     if contents is not None:
-        for i, (dataset, name) in enumerate(zip(it.islice(contents, 5), it.islice(names, 5))):
-            child, data = validate_dataset(i, dataset, name)
-            childrenUplMess.extend([child])
+        for i, (dataset, name) in enumerate(zip(it.islice(contents, 5), it.islice(filenames, 5))):
+            uplMess, data = validate_dataset(i, dataset, name)
+            childrenUplMess.extend([uplMess])
             datasets.extend([data])
             count += 1
 
         for j in range(count, 5):
             datasets.extend([{}])
 
-        return childrenUplMess, datasets[0], datasets[1], datasets[2], datasets[3], datasets[4]
+        options = [{'label': lab, 'value': 'dataset{}'.format(i)} for i, lab in enumerate(filenames)]
 
-    try:
-        return html.Div(['No dataset is uploaded.']), {}, {}, {}, {}, {}
-    except Exception as e:
-        print(e)
+        return childrenUplMess, datasets[0], datasets[1], datasets[2], datasets[3], \
+               datasets[4], options, ""
+
+    return html.Div(['No dataset is uploaded.']), {}, {}, {}, {}, {}, [], ""
 
 # Algorithm selection callbacks
 @app.callback(Output('algorithm-dropdown', 'options'),
