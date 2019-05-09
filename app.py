@@ -31,10 +31,10 @@ df1 = pd.DataFrame({'source': [random.randint(1, M) for _ in range(N)],
                     'target': [random.randint(1, M) for _ in range(N)],
                     'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
 G1 = nx.DiGraph(df1)
-df2 = pd.DataFrame({'source': [random.randint(1, M) for _ in range(N)],
-                    'target': [random.randint(1, M) for _ in range(N)],
+df2 = pd.DataFrame({'source': [random.randint(M, M+M) for _ in range(N)],
+                    'target': [random.randint(M, M+M) for _ in range(N)],
                     'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
-G2 = nx.DiGraph(df2)
+G2 = nx.DiGraph(df2[['source', 'target']])
 datasets = {'df1': df1, 'df2': df2}
 
 algorithms = {
