@@ -191,6 +191,14 @@ def getDataFrame(datasets, i):
     df = pd.DataFrame.from_records(datasets[i])
     return df
 
+def createDiGraph(df, weight):
+    G1 = nx.DiGraph()
+    if weight in df.columns:
+        G1.add_weighted_edges_from(zip(df['source'], df['target'], df[weight]))
+    else:
+        G1.add_edges_from(zip(df['source'], df['target']))
+    return G1
+
 #########################
 # INPUT PANEL CALLBACKS #
 #########################
@@ -265,8 +273,7 @@ def set_dijkstra_start_options(style, i, datasets):
     else:
         # TODO fix graph/dataset met callbacks
         df = getDataFrame(datasets, i)
-        G1 = nx.DiGraph()
-        G1.add_edges_from(zip(df['source'], df['target']))
+        G1 = createDiGraph(df, "")
         return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
 
 @app.callback(Output('dijkstra-start-dropdown', 'value'),
@@ -338,18 +345,20 @@ def append_new_graph(current_graphs, name, data, xlab, ylab):
 
 @app.callback(Output('saved-vis-graphs', 'children'),
               [Input('dijkstra-run-button', 'n_clicks')],
-              [State('dijkstra-start-dropdown', 'value'), State('dijkstra-weight-dropdown', 'value'),
+              [State('dataset-dropdown', 'label'),
+               State('datasets', 'data'), State('dijkstra-start-dropdown', 'value'),
+               State('dijkstra-weight-dropdown', 'value'),
                State('dataset-dropdown', 'value'), State('saved-vis-graphs', 'children'),
                State('dijkstra-weight-radio', 'value')])
-def run_dijkstra(n_clicks, start, weight, df_name, current_graphs, use_weight_column):
+def run_dijkstra(n_clicks, df_name, datasets, start, weight, i, current_graphs, use_weight_column):
     if n_clicks > 0:
-        df = datasets[df_name]
+        df = getDataFrame(datasets, i)
 
         if use_weight_column == 'no':
             df['weight'] = 1  # list of ones
             weight = 'weight'
 
-        G = nx.DiGraph(df)
+        G = createDiGraph(df, weight)
         dijkstra = Dijkstra(G, start, weight).dijkstra()  # Dijkstra's algorithm as generator
         time = []
         memory_use = []
@@ -443,9 +452,14 @@ def show_network(draw_network, layout, i, df_name, datasets):
 # Testing with strings! #
 #########################
 @app.callback(Output('show-div-content', 'children'),
-              [Input('dataset-dropdown', 'value')])
-def show_div_content(value):
-    return "{} has size {} MB".format(value, str(round(sys.getsizeof(df1)/1000000, 2)))
+              [Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def show_div_content(i, datasets):
+    if i is "":
+        raise PreventUpdate
+
+    df = getDataFrame(datasets, i)
+    return "{} has size {} MB".format(str(i), str(round(sys.getsizeof(df)/1000000, 2)))
 
 
 if __name__ == '__main__':
