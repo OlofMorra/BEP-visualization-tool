@@ -23,8 +23,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1221">
-              <caret line="358" column="18" selection-start-line="358" selection-start-column="18" selection-end-line="358" selection-end-column="18" />
+            <state relative-caret-position="325">
+              <caret line="431" column="36" lean-forward="true" selection-start-line="431" selection-start-column="36" selection-end-line="431" selection-end-column="36" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -35,8 +35,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requirements.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+            <state relative-caret-position="105">
+              <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
             </state>
           </provider>
         </entry>
@@ -71,6 +71,7 @@
     <option name="PREVIOUS_COMMIT_AUTHORS">
       <list>
         <option value="Freek-R &lt;33570091+freek-r@users.noreply.github.com&gt;" />
+        <option value="Freek-R &lt;33570091+freek-r@users.noreply.github.com&gt;A" />
         <option value="Olof Morra &lt;olofmorra@gmail.com&gt;" />
       </list>
     </option>
@@ -259,9 +260,7 @@
       <workItem from="1557084221024" duration="4985000" />
       <workItem from="1557145330640" duration="3332000" />
       <workItem from="1557221017147" duration="17622000" />
-      <workItem from="1557386091955" duration="3064000" />
-      <workItem from="1557392972358" duration="5531000" />
-      <workItem from="1557400328402" duration="248000" />
+      <workItem from="1557386091955" duration="9895000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
@@ -326,32 +325,25 @@
       <option name="project" value="LOCAL" />
       <updated>1557389241127</updated>
     </task>
-    <task id="LOCAL-00010" summary="requirements.txt: cytoscape added">
-      <created>1557392833419</created>
+    <task id="LOCAL-00010" summary="Merging work&#10;&#10;Merged all work done by me into the same file, hence, the tool is now 'complete' for now.">
+      <created>1557390838868</created>
       <option name="number" value="00010" />
       <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1557392833419</updated>
+      <updated>1557390838868</updated>
     </task>
-    <task id="LOCAL-00011" summary="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings.">
-      <created>1557397011371</created>
+    <task id="LOCAL-00011" summary="Merging work 2&#10;&#10;Merged all work done by me into the same file, hence, the tool is now 'complete' for now.">
+      <created>1557392427420</created>
       <option name="number" value="00011" />
       <option name="presentableId" value="LOCAL-00011" />
       <option name="project" value="LOCAL" />
-      <updated>1557397011371</updated>
+      <updated>1557392427420</updated>
     </task>
-    <task id="LOCAL-00012" summary="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings.">
-      <created>1557397031152</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1557397031152</updated>
-    </task>
-    <option name="localTasksCounter" value="13" />
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="79371000" />
+    <option name="totallyTimeSpent" value="80101000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -378,16 +370,17 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.23076923" />
-      <window_info anchor="bottom" id="Python Console" order="11" weight="0.22101842" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.36024097" />
+      <window_info anchor="bottom" id="Python Console" order="11" weight="0.22048193" />
+      <window_info anchor="right" x="0" y="0" width="310" height="700" id="Documentation" side_tool="true" weight="0.3297568" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" auto_hide="true" id="SciView" order="3" show_stripe_button="false" type="FLOATING" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="R Packages" order="5" />
       <window_info anchor="right" id="Database" order="6" />
-      <window_info active="true" anchor="right" id="Version Control" order="7" side_tool="true" visible="true" weight="0.3033049" />
+      <window_info anchor="right" id="Version Control" order="7" side_tool="true" visible="true" weight="0.1788269" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -447,9 +440,9 @@
     <MESSAGE value="Dijkstra implemented&#10;&#10;Partially completed docstring added to dijkstra(), which is in accordance with the &quot;Numpy Style&quot; Python docstrings." />
     <MESSAGE value="Algorithm selection callbacks set up&#10;&#10;Two dropdown menus added: one for algorithm type, one for specific algorithm.&#10;When selecting an algorithm type, the second drop down menu only shows&#10;algorithms of that type." />
     <MESSAGE value="Upload component&#10;&#10;Robust upload component that can handle csv, pickle, json, xpt, xls and dta files. At most five datasets can be uploaded, which are stored in five separate dash Store components. Input template is needed momentarily, as there is no check for correct format in file." />
-    <MESSAGE value="requirements.txt: cytoscape added" />
-    <MESSAGE value="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings." />
-    <option name="LAST_COMMIT_MESSAGE" value="Dropdown menus now robust against clearing value; cannot run algorithm without values for all settings anymore&#10;&#10;All settings need to have a value in order for the algorithm to run. If this is not the case, the algorithm will not start and a dialog window will pop up asking the user to select values for all settings." />
+    <MESSAGE value="Merging work&#10;&#10;Merged all work done by me into the same file, hence, the tool is now 'complete' for now." />
+    <MESSAGE value="Merging work 2&#10;&#10;Merged all work done by me into the same file, hence, the tool is now 'complete' for now." />
+    <option name="LAST_COMMIT_MESSAGE" value="Merging work 2&#10;&#10;Merged all work done by me into the same file, hence, the tool is now 'complete' for now." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/assets/style.css">
@@ -462,17 +455,6 @@
     <entry file="file://$PROJECT_DIR$/app_test.py" />
     <entry file="file://$PROJECT_DIR$/ExampleData.py" />
     <entry file="file://$PROJECT_DIR$/test.py" />
-    <entry file="file://$PROJECT_DIR$/testApp.py" />
-    <entry file="file://$PROJECT_DIR$/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1221">
-          <caret line="358" column="18" selection-start-line="358" selection-start-column="18" selection-end-line="358" selection-end-column="18" />
-          <folding>
-            <element signature="e#24#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/requirements.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -480,10 +462,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/testApp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="688">
+          <caret line="87" column="57" selection-start-line="87" selection-start-column="57" selection-end-line="87" selection-end-column="57" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/algorithms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1224">
-          <caret line="77" column="56" selection-start-line="77" selection-start-column="56" selection-end-line="77" selection-end-column="56" />
+        <state relative-caret-position="105">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="325">
+          <caret line="431" column="36" lean-forward="true" selection-start-line="431" selection-start-column="36" selection-end-line="431" selection-end-column="36" />
           <folding>
             <element signature="e#235#254#0" expanded="true" />
           </folding>
