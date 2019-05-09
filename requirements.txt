@@ -9,3 +9,4 @@ datetime
 dash-renderer
 plotly
 networkx==2.2
+dash_cytoscape
