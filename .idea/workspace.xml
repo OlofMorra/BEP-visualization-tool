@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="Algorithm selection callbacks set up&#10;&#10;Two dropdown menus added: one for algorithm type, one for specific algorithm.&#10;When selecting an algorithm type, the second drop down menu only shows&#10;algorithms of that type.">
+    <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
     </list>
@@ -23,8 +23,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="237" column="101" lean-forward="true" selection-start-line="237" selection-start-column="101" selection-end-line="237" selection-end-column="101" />
+            <state relative-caret-position="-272">
+              <caret line="192" column="47" selection-start-line="192" selection-start-column="47" selection-end-line="192" selection-end-column="47" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -35,7 +35,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/algorithms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="702">
+            <state relative-caret-position="855">
               <caret line="60" column="26" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
               <folding>
                 <element signature="e#235#254#0" expanded="true" />
@@ -47,7 +47,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requirements.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
+            <state relative-caret-position="150">
               <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
             </state>
           </provider>
@@ -65,8 +65,8 @@
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
       <list>
-        <option value="Freek-R &lt;33570091+freek-r@users.noreply.github.com&gt;" />
         <option value="Olof Morra &lt;olofmorra@gmail.com&gt;" />
+        <option value="Freek-R &lt;33570091+freek-r@users.noreply.github.com&gt;" />
       </list>
     </option>
     <option name="UPDATE_TYPE" value="MERGE" />
@@ -89,14 +89,15 @@
         <option value="$PROJECT_DIR$/app_test.py" />
         <option value="$PROJECT_DIR$/algorithms.py" />
         <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/testApp.py" />
         <option value="$PROJECT_DIR$/app.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-7" />
-    <option name="width" value="974" />
-    <option name="height" value="1047" />
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="y" value="23" />
+    <option name="width" value="1440" />
+    <option name="height" value="877" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -114,11 +115,6 @@
               <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
               <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
               <item name="assets" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
-              <item name="env" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -258,6 +254,7 @@
       <workItem from="1557084221024" duration="4985000" />
       <workItem from="1557145330640" duration="3332000" />
       <workItem from="1557221017147" duration="17622000" />
+      <workItem from="1557386091955" duration="3064000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
@@ -315,11 +312,18 @@
       <option name="project" value="LOCAL" />
       <updated>1557146577055</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Upload component&#10;&#10;Robust upload component that can handle csv, pickle, json, xpt, xls and dta files. At most five datasets can be uploaded, which are stored in five separate dash Store components. Input template is needed momentarily, as there is no check for correct format in file.">
+      <created>1557389241127</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1557389241127</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="70206000" />
+    <option name="totallyTimeSpent" value="73270000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -331,10 +335,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.12313433" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.12446352" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5007924" side_tool="true" weight="0.15884861" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -347,7 +351,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.3163597" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.3987952" />
       <window_info anchor="bottom" id="Python Console" order="11" weight="0.22101842" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -356,7 +360,7 @@
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="R Packages" order="5" />
       <window_info anchor="right" id="Database" order="6" />
-      <window_info anchor="right" id="Version Control" order="7" side_tool="true" visible="true" weight="0.2793177" />
+      <window_info anchor="right" id="Version Control" order="7" side_tool="true" visible="true" weight="0.27896994" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -415,7 +419,8 @@
     <MESSAGE value="Dijkstra implemented&#10;&#10;Our own implementation of Dijkstra's shortest path algorithm in Python calculates the distance from a source node to all other nodes in the network, and also returns for each node v the previous node in the shortest path from source to v.&#10;&#10;(package 'heapq' from Python Standard Library used for min heap operations)" />
     <MESSAGE value="Dijkstra implemented&#10;&#10;Partially completed docstring added to dijkstra(), which is in accordance with the &quot;Numpy Style&quot; Python docstrings." />
     <MESSAGE value="Algorithm selection callbacks set up&#10;&#10;Two dropdown menus added: one for algorithm type, one for specific algorithm.&#10;When selecting an algorithm type, the second drop down menu only shows&#10;algorithms of that type." />
-    <option name="LAST_COMMIT_MESSAGE" value="Algorithm selection callbacks set up&#10;&#10;Two dropdown menus added: one for algorithm type, one for specific algorithm.&#10;When selecting an algorithm type, the second drop down menu only shows&#10;algorithms of that type." />
+    <MESSAGE value="Upload component&#10;&#10;Robust upload component that can handle csv, pickle, json, xpt, xls and dta files. At most five datasets can be uploaded, which are stored in five separate dash Store components. Input template is needed momentarily, as there is no check for correct format in file." />
+    <option name="LAST_COMMIT_MESSAGE" value="Upload component&#10;&#10;Robust upload component that can handle csv, pickle, json, xpt, xls and dta files. At most five datasets can be uploaded, which are stored in five separate dash Store components. Input template is needed momentarily, as there is no check for correct format in file." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/assets/style.css">
@@ -425,33 +430,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
-          <caret line="47" selection-start-line="47" selection-end-line="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ExampleData.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/requirements.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/app_test.py" />
+    <entry file="file://$PROJECT_DIR$/ExampleData.py" />
+    <entry file="file://$PROJECT_DIR$/test.py" />
     <entry file="file://$PROJECT_DIR$/algorithms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
+        <state relative-caret-position="855">
           <caret line="60" column="26" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
           <folding>
             <element signature="e#235#254#0" expanded="true" />
@@ -459,10 +443,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testApp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="688">
+          <caret line="87" column="57" selection-start-line="87" selection-start-column="57" selection-end-line="87" selection-end-column="57" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="237" column="101" lean-forward="true" selection-start-line="237" selection-start-column="101" selection-end-line="237" selection-end-column="101" />
+        <state relative-caret-position="-272">
+          <caret line="192" column="47" selection-start-line="192" selection-start-column="47" selection-end-line="192" selection-end-column="47" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>

@@ -15,25 +15,28 @@ import io
 import random
 import json
 import itertools as it
+import sys
 
 import networkx as nx
-from algorithms import dijkstra, temp_func
+from algorithms import dijkstra
 
 app = dash.Dash(__name__)
 
-
-# GLOBAL VARIABLES
-df1 = pd.DataFrame({'source': [random.randint(1, 10) for _ in range(10)],
-                    'target': [random.randint(1, 10) for _ in range(10)],
-                    'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(10)]})
+####################
+# GLOBAL VARIABLES #
+####################
+N = 1000
+M = 100
+df1 = pd.DataFrame({'source': [random.randint(1, M) for _ in range(N)],
+                    'target': [random.randint(1, M) for _ in range(N)],
+                    'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
 G1 = nx.DiGraph(df1)
-df2 = pd.DataFrame({'source': [random.randint(1, 10) for _ in range(10)],
-                    'target': [random.randint(1, 10) for _ in range(10)],
-                    'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(10)]})
+df2 = pd.DataFrame({'source': [random.randint(1, M) for _ in range(N)],
+                    'target': [random.randint(1, M) for _ in range(N)],
+                    'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
 G2 = nx.DiGraph(df2)
 datasets = {'df1': df1, 'df2': df2}
 
-# structure: {algorithm type: {algorithm: [html structure]}}
 algorithms = {
     'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
     'Minimal spanning tree': ['Kruskal', 'Prim'],
@@ -44,8 +47,9 @@ network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'rand
 
 app.config['suppress_callback_exceptions'] = True
 
-
-# APP LAYOUT
+##############
+# APP LAYOUT #
+##############
 app.layout = html.Div(id='main-body', children=[
     # INPUT PANEL
     html.Div(className='input-panel', children=[
@@ -59,23 +63,17 @@ app.layout = html.Div(id='main-body', children=[
             className='upload-data',
             children=[html.Div(['Drag and Drop or ',
                                 html.A('Select Files')
-                                ]),
-                      html.Div(id='upload-message')],
+                                ]
+                        )],
             # Do allow multiple files to be uploaded
             multiple=True
         ),
-        html.Button('Click to store in memory', id='memory-button'),
-        html.Div(id='test'),
+        html.Div(id='upload-message'),
         dcc.Store(id='dataset1', storage_type='memory'),
         dcc.Store(id='dataset2', storage_type='memory'),
         dcc.Store(id='dataset3', storage_type='memory'),
         dcc.Store(id='dataset4', storage_type='memory'),
         dcc.Store(id='dataset5', storage_type='memory'),
-        # Storage components for datasets
-        html.Div(id='datasets', children=[
-            html.Div(id='nr-of-datasets', children='0', style={'display': 'none'})
-        ]),
-        html.Div(id='head-data-upload'),
 
         # Algorithm selection
         html.Hr(),
@@ -99,8 +97,15 @@ app.layout = html.Div(id='main-body', children=[
             html.Div(id='dijkstra-settings', style={'display': 'none'}, children=[
                 html.P('Select start node'),
                 dcc.Dropdown(id='dijkstra-start-dropdown'),
-                html.P('Select weight column'),
-                dcc.Dropdown(id='dijkstra-weight-dropdown'),
+                html.P('Edge weights:'),
+                dcc.RadioItems(
+                    id='dijkstra-weight-radio',
+                    options=[{'label': 'Edge weights all equal to 1', 'value': 'no'},
+                             {'label': 'Use column in dataset as edge weights', 'value': 'yes'}],
+                    value='no',
+                    labelStyle={'display': 'inline-block'}
+                ),
+                dcc.Dropdown(id='dijkstra-weight-dropdown', style={'display': 'none'}),
                 html.Button(id='dijkstra-run-button', n_clicks=0, children='Run algorithm', type='submit')
             ]),
             # Bellman-Ford
@@ -118,20 +123,31 @@ app.layout = html.Div(id='main-body', children=[
 
     # VISUAL ANALYTICS PANEL
     html.Div(className='vis-panel', children=[
-        html.H1('Visual analytics panel'),
-        html.Div(id='vis-graphs')
+        html.H1('Visual analytics panel', style={'display': 'inline-block'}),
+        dcc.Dropdown(id='show-graphs-dropdown', multi=True,
+                     style={'width': '70%', 'display': 'inline-block', 'vertical-align': 'middle', 'textAlign': 'right'}),
+        html.Div(id='shown-vis-graphs')
     ]),
 
     # OUTPUT PANEL
     html.Div(className='output-panel', children=[
         html.H1('Right panel'),
-        html.P('Layout:', style={'width': '25%', 'display': 'inline-block'}),
-        dcc.Dropdown(id='network-layout-dropdown',
-                     options=[{'label': x, 'value': x} for x in network_layouts],
-                     value=network_layouts[0],
-                     style={'width': '75%', 'display': 'inline-block', 'vertical-align': 'middle'}),
-        html.Div(id='network')
-    ])
+        html.Div(id='show-div-content'),
+        html.P('Draw network graph:'),
+        dcc.RadioItems(id='draw-network-radio',
+                       options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
+                       value='no'),
+        html.Div(id='network', style={'display': 'none'}, children=[
+            html.P('Layout:', style={'width': '25%', 'display': 'inline-block'}),
+            dcc.Dropdown(id='network-layout-dropdown',
+                         options=[{'label': x, 'value': x} for x in network_layouts],
+                         value=network_layouts[0],
+                         style={'width': '75%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+            html.Div(id='network-graph')])
+    ]),
+
+    # HIDDEN DIVS
+    html.Div(id='saved-vis-graphs', style={'display': 'none'}),
 ])
 
 
@@ -174,13 +190,14 @@ def validate_dataset(i, contents, filename):
             '. ' + str(e) + '.'
         ]), None
 
-    return html.Div(['Upload of ' + filename + ' (dataset ' + str(i) + ' was successful.']), df.to_dict('records')
+    return html.Div(['Upload of ' + filename + ' was successful.']), df.to_dict('records')
 
 #########################
 # INPUT PANEL CALLBACKS #
 #########################
 # Callback functions; functions that execute when something is changed
-@app.callback([Output('dataset1', 'data'),
+@app.callback([Output('upload-message', 'children'),
+               Output('dataset1', 'data'),
                Output('dataset2', 'data'),
                Output('dataset3', 'data'),
                Output('dataset4', 'data'),
@@ -206,23 +223,12 @@ def load_data(contents, names):
         for j in range(count, 5):
             datasets.extend([{}])
 
-        return datasets[0], datasets[1], datasets[2], datasets[3], datasets[4]
+        return childrenUplMess, datasets[0], datasets[1], datasets[2], datasets[3], datasets[4]
 
     try:
-        return {}, {}, {}, {}, {}
+        return html.Div(['No dataset is uploaded.']), {}, {}, {}, {}, {}
     except Exception as e:
         print(e)
-
-@app.callback(Output('test', 'children'),
-                  [Input('memory-button', 'n_clicks')],
-                  [State('dataset1', 'data')])
-def on_click(n_clicks, data):
-    if n_clicks is None:
-        # Preventing the None callbacks is important with the store component,
-        # you don't want to update the store for nothing.
-        raise PreventUpdate
-
-    return html.Div(str(data) + str(n_clicks))
 
 # Algorithm selection callbacks
 @app.callback(Output('algorithm-dropdown', 'options'),
@@ -276,57 +282,157 @@ def set_dijkstra_weight_options(style):
         # TODO fix graph/dataset met callbacks
         return [{'label': x, 'value': x} for x in df1.columns]
 
-@app.callback(Output('dijkstra-weight-dropdown', 'value'),
-              [Input('dijkstra-weight-dropdown', 'options')])
-def set_dijkstra_start_value(options):
-    if len(options) > 0:
-        if 'weight' in [x['value'] for x in options]:
-            return 'weight'
-        else:
-            return options[0]['value']
+
+@app.callback([Output('dijkstra-weight-dropdown', 'style'), Output('dijkstra-weight-dropdown', 'value')],
+              [Input('dijkstra-weight-radio', 'value')],
+              [State('dijkstra-weight-dropdown', 'options')])
+def set_dijkstra_weight_value(use_weight_column, options):
+    if use_weight_column == 'yes':
+        if len(options) > 0:
+            if 'weight' in [x['value'] for x in options]:
+                return {}, 'weight'
+            else:
+                return {}, options[0]['value']
     else:
-        return ''
+        return {'display': 'none'}, ''
 
 
 ####################################
 # VISUAL ANALYTICS PANEL CALLBACKS #
 ####################################
-@app.callback(Output('vis-graphs', 'children'),
+def append_new_graph(current_graphs, name, data, xlab, ylab):
+    if current_graphs is None:
+        name = name + str(1)  # id number corresponding to index in the list of graphs
+        graph = dcc.Graph(
+            id=name,
+            figure={
+                'data': data,
+                'layout': go.Layout(
+                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
+                )}
+        )
+        return list([graph])
+    else:
+        name = name + str(len(current_graphs) + 1)  # id number corresponding to index in the list of graphs
+        graph = dcc.Graph(
+            id=name,
+            figure={
+                'data': data,
+                'layout': go.Layout(
+                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
+                )}
+        )
+        current_graphs.append(graph)
+        return current_graphs
+
+@app.callback(Output('saved-vis-graphs', 'children'),
               [Input('dijkstra-run-button', 'n_clicks')],
               [State('dijkstra-start-dropdown', 'value'), State('dijkstra-weight-dropdown', 'value'),
-               State('dataset-dropdown', 'value'), State('vis-graphs', 'children')])
-def run_dijkstra(n_clicks, start, weight, df, current_graphs):
-    graph = dcc.Graph(figure={
-        'data': [{'x': datasets[df]['source'], 'y': datasets[df]['target'], 'type': 'line', 'name': 'SF'}]
-    })
+               State('dataset-dropdown', 'value'), State('saved-vis-graphs', 'children'),
+               State('dijkstra-weight-radio', 'value')])
+def run_dijkstra(n_clicks, start, weight, df_name, current_graphs, use_weight_column):
     if n_clicks > 0:
-        if current_graphs is None:
-            return list([graph])
-        else:
-            current_graphs.append(graph)
-            return current_graphs
+        df = datasets[df_name]
+
+        if use_weight_column == 'no':
+            df['weight'] = 1  # list of ones
+            weight = 'weight'
+
+        G = nx.DiGraph(df)
+        dijkstra = Dijkstra(G, start, weight).dijkstra()  # Dijkstra's algorithm as generator
+        time = []
+        memory_use = []
+
+        for t, memory, Q, u, neighs_u, dist, prev in dijkstra:
+            time.append(t)
+            memory_use.append(memory/1000000)  # in megabytes
+            result = dist, prev
+
+        current_graphs = append_new_graph(
+            current_graphs,
+            name='Alg:dijkstra | Data:{} | Run:'.format(df_name),
+            data=[{'x': [i for i in range(len(time))], 'y': time, 'type': 'bar', 'name': 'SF'}],
+            xlab='iteration number',
+            ylab='time (s)'
+        )
+        current_graphs = append_new_graph(
+            current_graphs,
+            name='Alg:dijkstra | Data:{} | Run:'.format(df_name),
+            data=[{'x': [i for i in range(len(memory_use))], 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
+            xlab='iteration number',
+            ylab='memory (MB)'
+        )
+        return current_graphs
+
+
+@app.callback(Output('show-graphs-dropdown', 'options'),
+              [Input('saved-vis-graphs', 'children')])
+def set_show_visualizations_dropdown_options(current_graphs):
+    if current_graphs is None:
+        return []
+    else:
+        return [{'label': graph['props']['id'], 'value': graph['props']['id']} for graph in current_graphs]
+
+
+@app.callback(Output('show-graphs-dropdown', 'value'),
+              [Input('show-graphs-dropdown', 'options')],
+              [State('show-graphs-dropdown', 'value')])
+def set_show_visualizations_dropdown_value(options, current_values):
+    if len(options) > 0:
+        if current_values is None:  # no value set
+            return list([options[-1]['value']])  # set last added option as value
+        else:  # at least one value present
+            current_values.append(options[-1]['value'])
+            return current_values
+
+
+@app.callback(Output('shown-vis-graphs', 'children'),
+              [Input('show-graphs-dropdown', 'value')],
+              [State('saved-vis-graphs', 'children')])
+def hide_visualizations(selected_graph_ids, saved_graphs):
+    result = []
+    if saved_graphs is None:
+        return result
+    else:
+        for graph in saved_graphs:
+            if graph['props']['id'] in selected_graph_ids:
+                result.append(graph.copy())
+        return result
 
 
 ##########################
 # OUTPUT PANEL CALLBACKS #
 ##########################
-@app.callback(Output('network', 'children'),
-              [Input('dataset-dropdown', 'value'), Input('network-layout-dropdown', 'value')])
-def show_network(df_name, layout):
-    df = datasets[df_name]
-    set_of_nodes = set(df['source']) | set(df['target'])  # union of the sets of source and target nodes
-    nodes = [{'data': {'id': x, 'label': x}} for x in set_of_nodes]
-    edges = [{'data': {'source': row['source'], 'target': row['target']}} for i, row in df[['source', 'target']].iterrows()]
-    elements = nodes + edges
+@app.callback([Output('network', 'style'), Output('network-graph', 'children')],
+              [Input('draw-network-radio', 'value'), Input('network-layout-dropdown', 'value')],
+              [State('dataset-dropdown', 'value')])
+def show_network(draw_network, layout, df_name):
+    if draw_network == 'yes':
+        df = datasets[df_name]
+        set_of_nodes = set(df['source']) | set(df['target'])  # union of the sets of source and target nodes
+        nodes = [{'data': {'id': x, 'label': x}} for x in set_of_nodes]
+        edges = [{'data': {'source': row['source'], 'target': row['target']}} for _, row in df[['source', 'target']].iterrows()]
+        elements = nodes + edges
 
-    return html.H3(df_name), cyto.Cytoscape(
-        id='cytoscape-layout-1',
-        elements=elements,
-        style={'width': '100%', 'height': '350px'},
-        layout={
-            'name': layout
-        }
-    )
+        return {}, [html.H3(df_name), cyto.Cytoscape(
+            id='cytoscape-layout-1',
+            elements=elements,
+            style={'width': '100%', 'height': '350px'},
+            layout={
+                'name': layout
+            })]
+    else:
+        return {'display': 'none'}, []
+
+
+#########################
+# Testing with strings! #
+#########################
+@app.callback(Output('show-div-content', 'children'),
+              [Input('dataset-dropdown', 'value')])
+def show_div_content(value):
+    return "{} has size {} MB".format(value, str(round(sys.getsizeof(df1)/1000000, 2)))
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
