@@ -35,7 +35,6 @@ df2 = pd.DataFrame({'source': [random.randint(1, M) for _ in range(N)],
                     'target': [random.randint(1, M) for _ in range(N)],
                     'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
 G2 = nx.DiGraph(df2)
-datasets = {'df1': df1, 'df2': df2}
 
 algorithms = {
     'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
@@ -69,11 +68,7 @@ app.layout = html.Div(id='main-body', children=[
             multiple=True
         ),
         html.Div(id='upload-message'),
-        dcc.Store(id='dataset1', storage_type='memory'),
-        dcc.Store(id='dataset2', storage_type='memory'),
-        dcc.Store(id='dataset3', storage_type='memory'),
-        dcc.Store(id='dataset4', storage_type='memory'),
-        dcc.Store(id='dataset5', storage_type='memory'),
+        dcc.Store(id='datasets', storage_type='memory'),
 
         # Algorithm selection
         html.Hr(),
@@ -192,16 +187,16 @@ def validate_dataset(i, contents, filename):
 
     return html.Div(['Upload of ' + filename + ' was successful.']), df.to_dict('records')
 
+def getDataFrame(datasets, i):
+    df = pd.DataFrame.from_records(datasets[i])
+    return df
+
 #########################
 # INPUT PANEL CALLBACKS #
 #########################
 # Callback functions; functions that execute when something is changed
 @app.callback([Output('upload-message', 'children'),
-               Output('dataset1', 'data'),
-               Output('dataset2', 'data'),
-               Output('dataset3', 'data'),
-               Output('dataset4', 'data'),
-               Output('dataset5', 'data'),
+               Output('datasets', 'data'),
                Output('dataset-dropdown', 'options'),
                Output('dataset-dropdown', 'value')],
               [Input('upload-field', 'contents')],
@@ -225,12 +220,11 @@ def load_data(contents, filenames):
         for j in range(count, 5):
             datasets.extend([{}])
 
-        options = [{'label': lab, 'value': 'dataset{}'.format(i)} for i, lab in enumerate(filenames)]
+        options = [{'label': lab, 'value': i} for i, lab in enumerate(filenames)]
 
-        return childrenUplMess, datasets[0], datasets[1], datasets[2], datasets[3], \
-               datasets[4], options, ""
+        return childrenUplMess, datasets, options, ""
 
-    return html.Div(['No dataset is uploaded.']), {}, {}, {}, {}, {}, [], ""
+    return html.Div(['No dataset is uploaded.']), [{}, {}, {}, {}, {}], [], ""
 
 # Algorithm selection callbacks
 @app.callback(Output('algorithm-dropdown', 'options'),
@@ -259,12 +253,20 @@ def show_settings(selected_algorithm):
 # Dijkstra callbacks
 # TODO account for possible changes in Graph object
 @app.callback(Output('dijkstra-start-dropdown', 'options'),
-              [Input('dijkstra-settings', 'style')])
-def set_dijkstra_start_options(style):
+              [Input('dijkstra-settings', 'style'),
+               Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def set_dijkstra_start_options(style, i, datasets):
+    if datasets is None or i is "":
+        raise PreventUpdate
+
     if 'display' in style.keys() and style['display'] == 'none':
         return []
     else:
         # TODO fix graph/dataset met callbacks
+        df = getDataFrame(datasets, i)
+        G1 = nx.DiGraph()
+        G1.add_edges_from(zip(df['source'], df['target']))
         return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
 
 @app.callback(Output('dijkstra-start-dropdown', 'value'),
@@ -276,13 +278,20 @@ def set_dijkstra_start_value(options):
         return ''
 
 @app.callback(Output('dijkstra-weight-dropdown', 'options'),
-              [Input('dijkstra-settings', 'style')])
-def set_dijkstra_weight_options(style):
+              [Input('dijkstra-settings', 'style'),
+               Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def set_dijkstra_weight_options(style, i, datasets):
+    if datasets is None or i is "":
+        raise PreventUpdate
+
+    df = getDataFrame(datasets, i)
+
     if 'display' in style.keys() and style['display'] == 'none':
         return []
     else:
         # TODO fix graph/dataset met callbacks
-        return [{'label': x, 'value': x} for x in df1.columns]
+        return [{'label': x, 'value': x} for x in df.columns]
 
 
 @app.callback([Output('dijkstra-weight-dropdown', 'style'), Output('dijkstra-weight-dropdown', 'value')],
@@ -406,11 +415,14 @@ def hide_visualizations(selected_graph_ids, saved_graphs):
 # OUTPUT PANEL CALLBACKS #
 ##########################
 @app.callback([Output('network', 'style'), Output('network-graph', 'children')],
-              [Input('draw-network-radio', 'value'), Input('network-layout-dropdown', 'value')],
-              [State('dataset-dropdown', 'value')])
-def show_network(draw_network, layout, df_name):
-    if draw_network == 'yes':
-        df = datasets[df_name]
+              [Input('draw-network-radio', 'value'),
+               Input('network-layout-dropdown', 'value'),
+               Input('dataset-dropdown', 'value')],
+              [State('dataset-dropdown', 'label'),
+               State('datasets', 'data')])
+def show_network(draw_network, layout, i, df_name, datasets):
+    if draw_network == 'yes' and i is not "":
+        df = getDataFrame(datasets, i)
         set_of_nodes = set(df['source']) | set(df['target'])  # union of the sets of source and target nodes
         nodes = [{'data': {'id': x, 'label': x}} for x in set_of_nodes]
         edges = [{'data': {'source': row['source'], 'target': row['target']}} for _, row in df[['source', 'target']].iterrows()]
