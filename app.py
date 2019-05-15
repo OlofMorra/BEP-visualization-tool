@@ -16,26 +16,26 @@ import random
 import json
 import itertools as it
 import sys
+import time
 
 import networkx as nx
 from algorithms import Dijkstra
 
+####################
+#   APP SETTINGS   #
+####################
 app = dash.Dash(__name__)
+
+app.config['suppress_callback_exceptions'] = True
+app.scripts.config.serve_locally = True
 
 ####################
 # GLOBAL VARIABLES #
 ####################
-N = 1000
-M = 100
-df1 = pd.DataFrame({'source': [random.randint(1, M) for _ in range(N)],
-                    'target': [random.randint(1, M) for _ in range(N)],
-                    'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
-G1 = nx.DiGraph(df1)
-df2 = pd.DataFrame({'source': [random.randint(M, M+M) for _ in range(N)],
-                    'target': [random.randint(M, M+M) for _ in range(N)],
-                    'weight': [random.lognormvariate(mu=0, sigma=0.5) for _ in range(N)]})
-G2 = nx.DiGraph(df2)
-
+# Use only for     #
+# standard options #
+# of cell          #
+####################
 algorithms = {
     'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
     'Minimal spanning tree': ['Kruskal', 'Prim'],
@@ -44,15 +44,13 @@ algorithms = {
 
 network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'random']
 
-app.config['suppress_callback_exceptions'] = True
-
 ##############
 # APP LAYOUT #
 ##############
 app.layout = html.Div(id='main-body', children=[
     # INPUT PANEL
     html.Div(className='input-panel', children=[
-        # Data loading
+        # Data uploading and saving
         html.H1('Input panel'),
         html.Div('Supported file types are csv, json, '
                  'xls, dta, xpt and pkl.'),
@@ -67,7 +65,9 @@ app.layout = html.Div(id='main-body', children=[
             # Do allow multiple files to be uploaded
             multiple=True
         ),
-        html.Div(id='upload-message'),
+        dcc.Loading(id="loading-data",
+                    children=[html.Div(id='upload-message')]
+                    , type="default"),
         dcc.Store(id='datasets', storage_type='memory'),
 
         # Algorithm selection
@@ -499,4 +499,4 @@ def show_div_content(i, datasets):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(threaded=True)
