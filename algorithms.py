@@ -12,6 +12,7 @@ from heapq import heapify, heappush, heappop
 import networkx as nx
 import time
 import sys
+from datetime import datetime
 
 __author__ = "Freek Rooks and Olof Morra"
 
@@ -75,6 +76,7 @@ class Dijkstra:
                     heappush(Q, (dist[v], v))
 
                 t_elapsed = time.time() - t_start
+                timestamp = datetime.now()
                 memory_used = self.get_memory_used(self.G, Q, dist, prev, neighs_u)
-                yield memory_used, t_elapsed, Q, u, neighs_u, dist, prev
+                yield memory_used, t_elapsed, timestamp, Q, u, neighs_u, dist, prev
         # return dist, prev

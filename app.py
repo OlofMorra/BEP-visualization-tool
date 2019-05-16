@@ -223,7 +223,12 @@ def append_new_graph(current_graphs, name, data, xlab, ylab):
             figure={
                 'data': data,
                 'layout': go.Layout(
-                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
+                    title={'text': name},
+                    xaxis={'title': xlab,
+                           'rangeslider' : {'visible': True},
+                            'type' : 'date',
+                           'tickformat':'%M~%S~%L'},
+                    yaxis={'title': ylab}
                 )}
         )
         return list([graph])
@@ -234,7 +239,10 @@ def append_new_graph(current_graphs, name, data, xlab, ylab):
             figure={
                 'data': data,
                 'layout': go.Layout(
-                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
+                    title={'text': name}, xaxis={'title': xlab,
+                           'rangeslider' : {'visible': True},
+                            'type' : 'date',
+                           'tickformat':'%M~%S~%L'}, yaxis={'title': ylab}
                 )}
         )
         current_graphs.append(graph)
@@ -403,25 +411,27 @@ def run_dijkstra(n_clicks, df_name, datasets, start, weight, i, current_graphs, 
 
         G = createDiGraph(df, weight)
         dijkstra = Dijkstra(G, start, weight).dijkstra()  # Dijkstra's algorithm as generator
+        timestamp = []
         time = []
         memory_use = []
 
-        for memory, t, Q, u, neighs_u, dist, prev in dijkstra:
+        for memory, t, tstamp, Q, u, neighs_u, dist, prev in dijkstra:
             time.append(t)
+            timestamp.append(tstamp)
             memory_use.append(memory/1000000)  # in megabytes
             result = dist, prev
 
         current_graphs = append_new_graph(
             current_graphs,
             name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(df_name),
-            data=[{'x': [i for i in range(len(time))], 'y': time, 'type': 'bar', 'name': 'SF'}],
+            data=[{'x': timestamp, 'y': time, 'type': 'bar', 'name': 'SF'}],
             xlab='iteration number',
             ylab='time (s)'
         )
         current_graphs = append_new_graph(
             current_graphs,
             name='Alg:dijkstra | Data:{} | Type:Memory | Run:'.format(df_name),
-            data=[{'x': [i for i in range(len(memory_use))], 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
+            data=[{'x': timestamp, 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
             xlab='iteration number',
             ylab='memory (MB)'
         )
@@ -506,4 +516,4 @@ def show_div_content(i, datasets):
 
 
 if __name__ == '__main__':
-    app.run_server(threaded=True) # Might want to switch to processes=4
+    app.run_server(debug=True) # Might want to switch to processes=4
