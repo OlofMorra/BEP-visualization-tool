@@ -35,9 +35,9 @@
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
       <list>
+        <option value="Olof Morra &lt;olofmorra@gmail.com&gt;" />
         <option value="Freek-R &lt;33570091+freek-r@users.noreply.github.com&gt;" />
         <option value="Freek-R &lt;33570091+freek-r@users.noreply.github.com&gt;A" />
-        <option value="Olof Morra &lt;olofmorra@gmail.com&gt;" />
       </list>
     </option>
     <option name="UPDATE_TYPE" value="REBASE" />
@@ -68,14 +68,15 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="877" />
+    <option name="width" value="1680" />
+    <option name="height" value="1027" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -92,7 +93,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">

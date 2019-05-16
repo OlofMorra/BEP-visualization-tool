@@ -55,19 +55,19 @@ app.layout = html.Div(id='main-body', children=[
         html.Div('Supported file types are csv, json, '
                  'xls, dta, xpt and pkl.'),
 
-        dcc.Upload(
-            id='upload-field',
-            className='upload-data',
-            children=[html.Div(['Drag and Drop or ',
-                                html.A('Select Files')
-                                ]
-                        )],
-            # Do allow multiple files to be uploaded
-            multiple=True
-        ),
+
         dcc.Loading(id="loading-data",
-                    children=[html.Div(id='upload-message')]
-                    , type="default"),
+                    children=[dcc.Upload(
+                                id='upload-field',
+                                className='upload-data',
+                                children=[html.Div(['Drag and Drop or ',
+                                                    html.A('Select Files')
+                                                    ]
+                                            )],
+                                # Do allow multiple files to be uploaded
+                                multiple=True
+                            ), html.Div(id='upload-message')],
+                    type="default"),
         dcc.Store(id='datasets', storage_type='memory'),
 
         # Algorithm selection
@@ -85,6 +85,7 @@ app.layout = html.Div(id='main-body', children=[
         ),
         html.P('Select algorithm to run'),
         dcc.Dropdown(id='algorithm-dropdown'),
+
         # Algorithm settings: everything present from the beginning and will be filled in when necessary with callbacks
         html.Div(id='algorithm-settings', children=[
             dcc.ConfirmDialog(
@@ -126,6 +127,7 @@ app.layout = html.Div(id='main-body', children=[
     ]),
 
     # VISUAL ANALYTICS PANEL
+    dcc.Store(id='graph-info', storage_type='memory'),
     html.Div(className='vis-panel', children=[
         html.H1('Visual analytics panel'),
         dcc.Dropdown(id='show-graphs-dropdown', multi=True,
@@ -198,9 +200,11 @@ def validate_dataset(i, contents, filename):
 
     return html.Div(['Upload of ' + filename + ' was successful.']), df.to_dict('records')
 
+
 def getDataFrame(datasets, i):
     df = pd.DataFrame.from_records(datasets[i])
     return df
+
 
 def createDiGraph(df, weight):
     G1 = nx.DiGraph()
@@ -209,6 +213,33 @@ def createDiGraph(df, weight):
     else:
         G1.add_edges_from(zip(df['source'], df['target']))
     return G1
+
+
+def append_new_graph(current_graphs, name, data, xlab, ylab):
+    if current_graphs is None:
+        name = name + str(1)  # id number corresponding to index in the list of graphs
+        graph = dcc.Graph(
+            id=name,
+            figure={
+                'data': data,
+                'layout': go.Layout(
+                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
+                )}
+        )
+        return list([graph])
+    else:
+        name = name + str(len(current_graphs) + 1)  # id number corresponding to index in the list of graphs
+        graph = dcc.Graph(
+            id=name,
+            figure={
+                'data': data,
+                'layout': go.Layout(
+                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
+                )}
+        )
+        current_graphs.append(graph)
+        return current_graphs
+
 
 #########################
 # INPUT PANEL CALLBACKS #
@@ -276,6 +307,7 @@ def set_algorithm_value(available_options):
         return available_options[0]['value']
 
 
+
 @app.callback([Output('dijkstra-settings', 'style'),
                Output('bellman-ford-settings', 'style'),
                Output('floyd-warshall-settings', 'style'),
@@ -319,6 +351,7 @@ def set_dijkstra_start_value(options):
         return None
 
 
+
 @app.callback(Output('dijkstra-weight-dropdown', 'options'),
               [Input('dijkstra-settings', 'style'),
                Input('dataset-dropdown', 'value')],
@@ -353,32 +386,6 @@ def set_dijkstra_weight_value(use_weight_column, options):
 ####################################
 # VISUAL ANALYTICS PANEL CALLBACKS #
 ####################################
-def append_new_graph(current_graphs, name, data, xlab, ylab):
-    if current_graphs is None:
-        name = name + str(1)  # id number corresponding to index in the list of graphs
-        graph = dcc.Graph(
-            id=name,
-            figure={
-                'data': data,
-                'layout': go.Layout(
-                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
-                )}
-        )
-        return list([graph])
-    else:
-        name = name + str(len(current_graphs) + 1)  # id number corresponding to index in the list of graphs
-        graph = dcc.Graph(
-            id=name,
-            figure={
-                'data': data,
-                'layout': go.Layout(
-                    title={'text': name}, xaxis={'title': xlab}, yaxis={'title': ylab}
-                )}
-        )
-        current_graphs.append(graph)
-        return current_graphs
-
-
 @app.callback(Output('saved-vis-graphs', 'children'),
               [Input('dijkstra-run-button', 'n_clicks')],
               [State('dataset-dropdown', 'label'),
@@ -499,4 +506,4 @@ def show_div_content(i, datasets):
 
 
 if __name__ == '__main__':
-    app.run_server(threaded=True)
+    app.run_server(threaded=True) # Might want to switch to processes=4
