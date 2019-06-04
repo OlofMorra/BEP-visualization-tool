@@ -56,7 +56,8 @@ class Dijkstra:
         # initialize distances and paths
         for v in self.G.nodes:
             if v != self.start:
-                dist[v] = float('inf')
+                # dist[v] = float('inf')
+                dist[v] = 1e12
             prev[v] = None
             heappush(Q, (dist[v], v))  # insert v, maintaining min heap property
 
@@ -67,6 +68,7 @@ class Dijkstra:
             for v in neighs_u:
                 t_start = time.time()  # keep track of time
 
+                print(u, v, self.weight)
                 alt = dist_u + self.G.edges[u, v][self.weight]  # dist(source, u) + dist(u, v)
 
                 if alt < dist[v]:  # update dist if alt dist < current dist
