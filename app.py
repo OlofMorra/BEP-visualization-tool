@@ -17,6 +17,8 @@ import json
 import itertools as it
 import sys
 import time
+from operator import itemgetter
+import copy
 
 import networkx as nx
 from algorithms import Dijkstra
@@ -27,7 +29,7 @@ from algorithms import Dijkstra
 app = dash.Dash(__name__)
 
 app.config['suppress_callback_exceptions'] = True
-app.scripts.config.serve_locally = True
+#app.scripts.config.serve_locally = True
 
 ####################
 # GLOBAL VARIABLES #
@@ -104,7 +106,10 @@ app.layout = html.Div(id='main-body', children=[
                     labelStyle={'display': 'inline-block'}
                 ),
                 dcc.Dropdown(id='dijkstra-weight-dropdown', style={'display': 'none'}),
-                html.Button(id='dijkstra-run-button', n_clicks=0, children='Run algorithm', type='submit')
+                dcc.Loading(id="dijkstra-running", children=[
+                    html.Button(id='dijkstra-run-button', n_clicks=0, children='Run algorithm',
+                                type='submit')]
+                            , type="circle"),
             ]),
             # Bellman-Ford
             html.Div(id='bellman-ford-settings', style={'display': 'none'}, children=[
@@ -152,9 +157,23 @@ app.layout = html.Div(id='main-body', children=[
 
         # Algorithm animation
         dcc.Store(id='stored-alg-output', storage_type='memory'),
-        dcc.Dropdown(id='algorithm-runs-dropdown'),
+
+        dcc.Dropdown(id='algorithm-runs-dropdown',
+                     style={'width': '90%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+        html.Button(id='choose-run-button', children='Submit', type='submit',
+                    style={'display': 'inline-block', 'vertical-align': 'middle'},
+                    n_clicks=0, n_clicks_timestamp=0),
+
         html.Div(id='network-animation'),
-        dcc.RangeSlider(id='iteration-range-slider', pushable=0)
+        html.Div(id='iteration-range-slider-block', children=[
+            dcc.RangeSlider(id='iteration-range-slider', pushable=0),
+        ], style={'height': '40px'}),
+        html.Div(id='animation-buttons', children=[
+            html.Button(id='animation-run-button', children='Run animation', type='submit',
+                        n_clicks=0, n_clicks_timestamp=0),
+            html.Button(id='animation-stop-button', n_clicks=0, children='Stop animation', type='submit')
+        ]),
+        dcc.Interval(id='animation-interval', disabled=True)
     ]),
 
     # HIDDEN DIVS
@@ -389,21 +408,31 @@ def append_new_graph(current_graphs, name, data, xlab, ylab):
         return current_graphs
 
 
-@app.callback([Output('saved-vis-graphs', 'children'),
-               Output('stored-alg-output', 'data'),
-               Output('iteration-range-slider', 'min'),
-               Output('iteration-range-slider', 'max'),
-               Output('iteration-range-slider', 'marks'),
-               Output('iteration-range-slider', 'value')],
+def clean_dict(mydict):
+    for key, value in mydict.items():
+        if type(key) is not str:
+            try:
+                mydict[str(key)] = mydict[key]
+            except Exception as e:
+                print(e)
+                try:
+                    mydict[repr(key)] = mydict[key]
+                except Exception as e2:
+                    print(e2, str(2))
+                    pass
+            del mydict[key]
+    return mydict
+
+
+@app.callback(Output('stored-alg-output', 'data'),
               [Input('dijkstra-run-button', 'n_clicks')],
               [State('dataset-dropdown', 'value'),
                State('datasets', 'data'),
                State('dijkstra-start-dropdown', 'value'),
                State('dijkstra-weight-dropdown', 'value'),
-               State('saved-vis-graphs', 'children'),
                State('stored-alg-output', 'data'),
                State('dijkstra-weight-radio', 'value')])
-def run_dijkstra(n_clicks, df_name, datasets, start, weight, current_graphs, alg_output_dict, use_weight_column):
+def run_dijkstra(n_clicks, df_name, datasets, start, weight, alg_output_dict, use_weight_column):
     if n_clicks == 0 or None in (df_name, start):
         raise PreventUpdate
 
@@ -412,40 +441,24 @@ def run_dijkstra(n_clicks, df_name, datasets, start, weight, current_graphs, alg
     if use_weight_column == 'no':
         df['weight'] = 1  # list of ones
         weight = 'weight'
-    print(weight)
+
     G = createDiGraph(df, weight)
     dijkstra = Dijkstra(G, start, weight).dijkstra()  # Dijkstra's algorithm as generator
-    time = []
-    memory_use = []
     iterations = []
 
     for memory, t, Q, u, neighs_u, dist, prev in dijkstra:
-        time.append(t)
-        memory_use.append(memory/1000000)  # in megabytes
+        # Call clean_dict twice as last key will not be converted to a string
+        dist_str = clean_dict(clean_dict(copy.deepcopy(dist)))
+        prev_str = clean_dict(clean_dict(copy.deepcopy(prev)))
         iterations.append({
+            't': float(t),
+            'memory': memory / 1000000,  # in megabytes
             'Q': Q.copy(),
             'u': u,
             'neighs_u': neighs_u,
-            'dist': dist.copy(),
-            'prev': prev.copy()
+            'dist': dist_str,
+            'prev': prev_str
         })
-
-    print(prev)
-
-    current_graphs = append_new_graph(
-        current_graphs,
-        name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(df_name),
-        data=[{'x': [i for i in range(len(time))], 'y': time, 'type': 'bar', 'name': 'SF'}],
-        xlab='iteration number',
-        ylab='time (s)'
-    )
-    current_graphs = append_new_graph(
-        current_graphs,
-        name='Alg:dijkstra | Data:{} | Type:Memory | Run:'.format(df_name),
-        data=[{'x': [i for i in range(len(memory_use))], 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
-        xlab='iteration number',
-        ylab='memory (MB)'
-    )
 
     name = 'Dijkstra run '
     if alg_output_dict is None:
@@ -453,23 +466,45 @@ def run_dijkstra(n_clicks, df_name, datasets, start, weight, current_graphs, alg
         name = name + str(1)
     else:
         name = name + str(len(alg_output_dict.keys()) + 1)
-    alg_output_dict[name] = {'dataset_number': df_name,
+    alg_output_dict[name] = {'t_added': time.time(),
+                             'dataset_number': df_name,
                              'start': start,
                              'weight': weight,
                              'use_weight_column': use_weight_column,
                              'iterations': iterations.copy()}
 
-    slider_min = 0
-    slider_max = len(iterations)-1
-    slider_value = [slider_min, slider_min, slider_max]
-    if slider_max <= 10:
-        step = 1
-    else:
-        step = int((slider_max+1 - slider_min) / 10)
-    slider_marks = {i: str(i) for i in range(slider_min, slider_max+1, step)}
-    slider_marks[slider_max] = str(slider_max)  # add last element in case range step is too high
+    return alg_output_dict
 
-    return current_graphs, alg_output_dict, slider_min, slider_max, slider_marks, slider_value
+
+@app.callback(Output('saved-vis-graphs', 'children'),
+              [Input('stored-alg-output', 'data')],
+              [State('saved-vis-graphs', 'children')])
+def create_dijkstra_graphs(run_data, current_graphs):
+    if None in (run_data):
+        raise PreventUpdate
+
+    last_added = sorted([(d['t_added'], name, d['iterations']) for name, d in run_data.items()], key=itemgetter(0))[-1]
+    iterations = last_added[2]
+    name = last_added[1]
+
+    iteration_times = [i['t'] for i in iterations]
+    memory_use = [i['memory'] for i in iterations]
+
+    current_graphs = append_new_graph(
+        current_graphs,
+        name=name + '1',
+        data=[{'x': [i for i in range(len(iteration_times))], 'y': iteration_times, 'type': 'bar', 'name': 'SF'}],
+        xlab='iteration number',
+        ylab='time (s)'
+    )
+    current_graphs = append_new_graph(
+        current_graphs,
+        name=name + '2',
+        data=[{'x': [i for i in range(len(memory_use))], 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
+        xlab='iteration number',
+        ylab='memory (MB)'
+    )
+    return current_graphs
 
 
 @app.callback(Output('show-graphs-dropdown', 'options'),
@@ -604,13 +639,47 @@ def draw_full_animation_network(run_name, run_data, datasets):
     ),
 
 
+@app.callback([Output('iteration-range-slider', 'min'),
+               Output('iteration-range-slider', 'max'),
+               Output('iteration-range-slider', 'marks'),
+               Output('iteration-range-slider', 'value')],
+              [Input('choose-run-button', 'n_clicks_timestamp'),
+               Input('animation-run-button', 'n_clicks_timestamp')],
+              [State('algorithm-runs-dropdown', 'value'),
+               State('stored-alg-output', 'data'),
+               State('iteration-range-slider', 'value'),
+               State('animation-interval', 'n_intervals')])
+def set_iteration_range_slider(t_choice, t_animation, run_name, run_data, iteration_range, n_intervals):
+    if None in (run_data, run_name):
+        raise PreventUpdate
+
+    if t_choice > t_animation:
+        iterations = run_data[run_name]['iterations']
+
+        slider_min = 0
+        slider_max = len(iterations)-1
+        slider_value = [slider_min, slider_min, slider_max]
+        if slider_max <= 10:
+            step = 1
+        else:
+            step = int((slider_max+1 - slider_min) / 10)
+        slider_marks = {i: str(i) for i in range(slider_min, slider_max+1, step)}
+        slider_marks[slider_max] = str(slider_max)  # add last element in case range step is too high
+
+        return slider_min, slider_max, slider_marks, slider_value
+    else:
+        print(n_intervals)
+        return 0, 0, 0, 0
+
+
 @app.callback(Output('cytoscape-network-animation', 'stylesheet'),
               [Input('iteration-range-slider', 'value')],
               [State('stored-alg-output', 'data'),
                State('algorithm-runs-dropdown', 'value'),
                State('datasets', 'data'),
-               State('cytoscape-network-animation', 'stylesheet')])
-def draw_animation_iteration(iteration_range, run_data, run_name, datasets, stylesheet):
+               State('cytoscape-network-animation', 'stylesheet'),
+               State('cytoscape-network-animation', 'elements')])
+def draw_animation_iteration(iteration_range, run_data, run_name, datasets, stylesheet, elements):
     if None in (run_name, run_data, iteration_range, datasets, stylesheet):
         raise PreventUpdate
 
@@ -624,72 +693,58 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets, styl
         df['weight'] = 1  # list of ones
         weight = 'weight'
 
+    all_nodes = [node['data']['id'] for node in elements if 'source' not in node['data'].keys()]
+    all_edges = [edge['data']['id'] for edge in elements if 'source' in edge['data'].keys()]
+
+    # key: edge id, value: edge weight (label)
+    # assumption only one entry of edge (x,y) in a dataset
+    edges = {str(src) + tg: df[(df['source'] == src) & (df['target'] == int(tg))][weight].iloc[0]
+             for tg, src in iteration['prev'].items() if src is not None}
     nodes = [str(node) for node, dist in iteration["dist"].items() if dist < 1e12]
-    edges = [{'id': str(src) + tg,
-              'label': df[(df['source'] == src) & (df['target'] == int(tg))][weight].iloc[0],  # assumption only one entry of edge (x,y) in a dataset
-              'source': src,
-              'target': int(tg)}
-             for tg, src in iteration['prev'].items() if src is not None]
 
     if len(nodes) > 0:
         stylesheet.extend([
-            {'selector': '#' + node,
+            {'selector': '#' + str(node),
              'style': {'opacity': 1}
-             } for node in nodes
+             } if node in nodes else {
+                'selector': '#' + str(node),
+                'style': {'opacity': 0.3}
+            } for node in all_nodes
         ])
     if len(edges) > 0:
         stylesheet.extend([
-            {'selector': '#'+edge['id'],
+            {'selector': '#' + str(edge_id),
              'style': {
-                 'content': edge['label'],
+                 'content': edges[edge_id],
                  'opacity': 1}
-             } for edge in edges
+             } if edge_id in edges.keys() else {
+                'selector': '#' + str(edge_id),
+                'style': {
+                    'content': 'inf',
+                    'opacity': 0.3}
+            } for edge_id in all_edges
         ])
 
+    start = str(run_data[run_name]['start'])
+    stylesheet.append({'selector': '#' + start,
+                       'style': {'content': start + '\n(start)'}})
     return stylesheet
 
-# def run_animation(n_clicks, value):
 
+@app.callback([Output('animation-interval', 'interval'),
+               Output('animation-interval', 'n_intervals'),
+               Output('animation-interval', 'max_intervals'),
+               Output('animation-interval', 'disabled')],
+              [Input('animation-run-button', 'n_clicks')],
+              [State('iteration-range-slider', 'value')])
+def run_animation(n_clicks, iteration_range):
+    if n_clicks == 0 or iteration_range is None:
+        raise PreventUpdate
 
-
-# def oud():
-#     if None in (network, run_name, run_data, iteration_range):
-#         raise PreventUpdate
-#
-#     i = int(iteration_range[1])  # iteration_range = (min, value, max)
-#     iteration = run_data[run_name]['iterations'][i]  # iteration data: dictionary containing Q, u, neighs_u, dist, prev
-#     df = getDataFrame(datasets, run_data[run_name]['dataset_number'])
-#     weight = run_data[run_name]['weight']
-#
-#     elements = [{'data': {'id': node, 'label': node}} for node, dist in iteration["dist"].items() if
-#                 dist < 1e12]  # nodes
-#     edges = [{'data': {'id': str(src) + tg,
-#                        'label': df[(df['source'] == src) & (df['target'] == int(tg))][weight].iloc[0],
-#                        # assumption only one entry of edge (x,y) in a dataset
-#                        'source': src,
-#                        'target': int(tg)}}
-#              for tg, src in iteration['prev'].items() if src is not None]
-#     elements.extend(edges)
-#
-#     stylesheet = [
-#         {'selector': 'edge',
-#          'style': {
-#              'content': 'data(label)',
-#              'curve-style': 'bezier',
-#              'target-arrow-color': 'black',
-#              'target-arrow-shape': 'vee',
-#              'line-color': 'black',
-#              'arrow-scale': 2}
-#          },
-#         {'selector': 'node',
-#          'style': {
-#              'content': 'data(id)',
-#              'background-color': 'black'}
-#          }
-#     ]
-#
-#     return stylesheet
-
+    interval = 1000  # 1 second
+    n_intervals = iteration_range[0]
+    max_intervals = iteration_range[2] - iteration_range[0]
+    return interval, n_intervals, max_intervals, False
 
 
 #########################
@@ -699,7 +754,7 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets, styl
               [Input('dataset-dropdown', 'value')],
               [State('datasets', 'data')])
 def show_div_content(i, datasets):
-    if i is "":
+    if None in (i, datasets):
         raise PreventUpdate
 
     df = getDataFrame(datasets, i)
@@ -707,4 +762,5 @@ def show_div_content(i, datasets):
 
 
 if __name__ == '__main__':
-    app.run_server(threaded=True) # Might want to switch to processes=4
+    #app.run_server(threaded=True) # Might want to switch to processes=4
+    app.run_server(debug=True)

@@ -59,22 +59,21 @@ class Dijkstra:
                 # dist[v] = float('inf')
                 dist[v] = 1e12
             prev[v] = None
-            heappush(Q, (dist[v], v))  # insert v, maintaining min heap property
+            heappush(Q, [float(dist[v]), float(v)])  # insert v, maintaining min heap property
 
         while Q:
             dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
-            neighs_u = [x for x in nx.neighbors(self.G, u) if x in [y[1] for y in Q]]  # neighbors of u that are still in Q
+            neighs_u = [float(x) for x in nx.neighbors(self.G, u) if x in [y[1] for y in Q]]  # neighbors of u that are still in Q
 
             for v in neighs_u:
                 t_start = time.time()  # keep track of time
 
-                print(u, v, self.weight)
                 alt = dist_u + self.G.edges[u, v][self.weight]  # dist(source, u) + dist(u, v)
 
                 if alt < dist[v]:  # update dist if alt dist < current dist
                     dist[v] = alt
                     prev[v] = u
-                    heappush(Q, (dist[v], v))
+                    heappush(Q, [float(dist[v]), float(v)])
 
                 t_elapsed = time.time() - t_start
                 memory_used = self.get_memory_used(self.G, Q, dist, prev, neighs_u)
