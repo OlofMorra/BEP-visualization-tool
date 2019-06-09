@@ -29,7 +29,7 @@ class Dijkstra:
             result += sys.getsizeof(x)
         return result
 
-    def dijkstra(self):
+    def init_dijkstra(self):
         """Implementation of Dijkstra's shortest path algorithm to find shortest weighted paths from source to all other
         nodes graph G.
 
@@ -61,7 +61,11 @@ class Dijkstra:
             prev[v] = None
             heappush(Q, (dist[v], v))  # insert v, maintaining min heap property
 
-        while Q:
+        return Q, dist, prev
+
+
+    def iter_dijkstra(self, Q, dist, prev):
+        if Q is not None:
             dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
             neighs_u = [x for x in nx.neighbors(self.G, u) if x in [y[1] for y in Q]]  # neighbors of u that are still in Q
 
@@ -79,4 +83,4 @@ class Dijkstra:
                 timestamp = datetime.now()
                 memory_used = self.get_memory_used(self.G, Q, dist, prev, neighs_u)
                 yield memory_used, t_elapsed, timestamp, Q, u, neighs_u, dist, prev
-        # return dist, prev
+        return Q, dist, prev

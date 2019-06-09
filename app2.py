@@ -387,6 +387,35 @@ def set_dijkstra_weight_value(use_weight_column, options):
         return {'display': 'none'}, ''
 
 
+####################################
+# VISUAL ANALYTICS PANEL CALLBACKS #
+####################################
+@app.callback(Output('graph-info', 'data'),
+              [Input('dijkstra-run-button', 'n_clicks')],
+              [State('dataset-dropdown', 'label'),
+               State('datasets', 'data'), State('dijkstra-start-dropdown', 'value'),
+               State('dijkstra-weight-dropdown', 'value'),
+               State('dataset-dropdown', 'value'),
+               State('saved-vis-graphs', 'children'),
+               State('dijkstra-weight-radio', 'value')])
+def run_dijkstra(n_clicks, df_name, datasets, start, weight, i, current_graphs, use_weight_column):
+    Q = list()
+    dist = dict()
+    prev = dict()
+    if n_clicks > 0 and i not in ("", None):
+        df = getDataFrame(datasets, i)
+
+        if use_weight_column == 'no':
+            df['weight'] = 1  # list of ones
+            weight = 'weight'
+
+        G = createDiGraph(df, weight)
+        Q, dist, prev = Dijkstra(G, start, weight).init_dijkstra()  # Dijkstra's algorithm as generator
+
+    return [Q, dist, prev]
+
+
+
 ##############
 # APP LAYOUT #
 ##############
