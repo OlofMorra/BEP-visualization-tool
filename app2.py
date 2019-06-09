@@ -19,7 +19,7 @@ import sys
 import time
 
 import networkx as nx
-from algorithms import Dijkstra
+from algorithms2 import Dijkstra
 
 ####################
 #   APP SETTINGS   #
@@ -44,29 +44,27 @@ algorithms = {
 
 network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'random']
 
-##############
-# APP LAYOUT #
-##############
-app.layout = html.Div(id='main-body', children=[
-    # INPUT PANEL
-    html.Div(className='input-panel', children=[
+###################
+# CREATING PANELS #
+###################
+
+
+def create_input_panel():
+    return html.Div(className='input-panel', children=[
         # Data uploading and saving
         html.H1('Input panel'),
         html.Div('Supported file types are csv, json, '
                  'xls, dta, xpt and pkl.'),
 
-
         dcc.Loading(id="loading-data",
                     children=[dcc.Upload(
-                                id='upload-field',
-                                className='upload-data',
-                                children=[html.Div(['Drag and Drop or ',
-                                                    html.A('Select Files')
-                                                    ]
-                                            )],
-                                # Do allow multiple files to be uploaded
-                                multiple=True
-                            ), html.Div(id='upload-message')],
+                        id='upload-field',
+                        className='upload-data',
+                        children=[html.Div(['Drag and Drop or ',
+                                    html.A('Select Files')])],
+                        # Do allow multiple files to be uploaded
+                        multiple=True
+                    ), html.Div(id='upload-message')],
                     type="default"),
         dcc.Store(id='datasets', storage_type='memory'),
 
@@ -89,8 +87,8 @@ app.layout = html.Div(id='main-body', children=[
         # Algorithm settings: everything present from the beginning and will be filled in when necessary with callbacks
         html.Div(id='algorithm-settings', children=[
             dcc.ConfirmDialog(
-                    id='settings-missing-dialog',
-                    message='Please select a value for all settings'),
+                id='settings-missing-dialog',
+                message='Please select a value for all settings'),
             # Dijkstra
             html.Div(id='dijkstra-settings', style={'display': 'none'}, children=[
                 html.H3('Settings'),
@@ -113,48 +111,47 @@ app.layout = html.Div(id='main-body', children=[
             ]),
             # Floyd Warshall
             html.Div(id='floyd-warshall-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),]),
+                html.H3('Settings'), ]),
             # Kruskal
             html.Div(id='kruskal-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),]),
+                html.H3('Settings'), ]),
             # Prim
             html.Div(id='prim-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),]),
+                html.H3('Settings'), ]),
             # Ford-Fulkerson
             html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),])
+                html.H3('Settings'), ])
         ]),
-    ]),
+    ])
 
-    # VISUAL ANALYTICS PANEL
-    dcc.Store(id='graph-info', storage_type='memory'),
-    html.Div(className='vis-panel', children=[
-        html.H1('Visual analytics panel'),
-        dcc.Dropdown(id='show-graphs-dropdown', multi=True,
-                     style={'vertical-align': 'middle'}),
-        html.Div(id='shown-vis-graphs')
-    ]),
 
-    # OUTPUT PANEL
-    html.Div(className='output-panel', children=[
-        html.H1('Right panel'),
-        html.Div(id='show-div-content'),
-        html.P('Draw network graph:'),
-        dcc.RadioItems(id='draw-network-radio',
-                       options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
-                       value='no'),
-        html.Div(id='network', style={'display': 'none'}, children=[
-            html.P('Layout:', style={'width': '25%', 'display': 'inline-block'}),
-            dcc.Dropdown(id='network-layout-dropdown',
-                         options=[{'label': x, 'value': x} for x in network_layouts],
-                         value=network_layouts[0],
-                         style={'width': '75%', 'display': 'inline-block', 'vertical-align': 'middle'}),
-            html.Div(id='network-graph')])
-    ]),
+def create_visualisation_panel():
+    return html.Div(className='visualisation-panel', children=[
+                dcc.Store(id='graph-info', storage_type='memory'),
+                html.Div(className='vis-panel', children=[
+                    html.H1('Visual analytics panel'),
+                    dcc.Dropdown(id='show-graphs-dropdown', multi=True,
+                                 style={'vertical-align': 'middle'}),
+                    html.Div(id='shown-vis-graphs')
+                ])])
 
-    # HIDDEN DIVS
-    html.Div(id='saved-vis-graphs', style={'display': 'none'}),
-])
+
+def create_output_panel():
+    return html.Div(className='output-panel', children=[
+                html.H1('Right panel'),
+                html.Div(id='show-div-content'),
+                html.P('Draw network graph:'),
+                dcc.RadioItems(id='draw-network-radio',
+                               options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
+                               value='no'),
+                html.Div(id='network', style={'display': 'none'}, children=[
+                    html.P('Layout:', style={'width': '25%', 'display': 'inline-block'}),
+                    dcc.Dropdown(id='network-layout-dropdown',
+                                 options=[{'label': x, 'value': x} for x in network_layouts],
+                                 value=network_layouts[0],
+                                 style={'width': '75%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+                    html.Div(id='network-graph')])
+            ])
 
 
 #############
@@ -359,7 +356,6 @@ def set_dijkstra_start_value(options):
         return None
 
 
-
 @app.callback(Output('dijkstra-weight-dropdown', 'options'),
               [Input('dijkstra-settings', 'style'),
                Input('dataset-dropdown', 'value')],
@@ -391,129 +387,22 @@ def set_dijkstra_weight_value(use_weight_column, options):
         return {'display': 'none'}, ''
 
 
-####################################
-# VISUAL ANALYTICS PANEL CALLBACKS #
-####################################
-@app.callback(Output('saved-vis-graphs', 'children'),
-              [Input('dijkstra-run-button', 'n_clicks')],
-              [State('dataset-dropdown', 'label'),
-               State('datasets', 'data'), State('dijkstra-start-dropdown', 'value'),
-               State('dijkstra-weight-dropdown', 'value'),
-               State('dataset-dropdown', 'value'), State('saved-vis-graphs', 'children'),
-               State('dijkstra-weight-radio', 'value')])
-def run_dijkstra(n_clicks, df_name, datasets, start, weight, i, current_graphs, use_weight_column):
-    if n_clicks > 0 and i not in ("", None):
-        df = getDataFrame(datasets, i)
+##############
+# APP LAYOUT #
+##############
+app.layout = html.Div(id='main-body', children=[
+    # INPUT PANEL
+    create_input_panel(),
 
-        if use_weight_column == 'no':
-            df['weight'] = 1  # list of ones
-            weight = 'weight'
+    # VISUAL ANALYTICS PANEL
+    create_visualisation_panel(),
 
-        G = createDiGraph(df, weight)
-        dijkstra = Dijkstra(G, start, weight).dijkstra()  # Dijkstra's algorithm as generator
-        timestamp = []
-        time = []
-        memory_use = []
+    # OUTPUT PANEL
+    create_output_panel(),
 
-        for memory, t, tstamp, Q, u, neighs_u, dist, prev in dijkstra:
-            time.append(t)
-            timestamp.append(tstamp)
-            memory_use.append(memory/1000000)  # in megabytes
-            result = dist, prev
-
-        current_graphs = append_new_graph(
-            current_graphs,
-            name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(df_name),
-            data=[{'x': timestamp, 'y': time, 'type': 'bar', 'name': 'SF'}],
-            xlab='iteration number',
-            ylab='time (s)'
-        )
-        current_graphs = append_new_graph(
-            current_graphs,
-            name='Alg:dijkstra | Data:{} | Type:Memory | Run:'.format(df_name),
-            data=[{'x': timestamp, 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
-            xlab='iteration number',
-            ylab='memory (MB)'
-        )
-        return current_graphs
-
-
-@app.callback(Output('show-graphs-dropdown', 'options'),
-              [Input('saved-vis-graphs', 'children')])
-def set_show_visualizations_dropdown_options(current_graphs):
-    if current_graphs is None:
-        return []
-    else:
-        return [{'label': graph['props']['id'], 'value': graph['props']['id']} for graph in current_graphs]
-
-
-@app.callback(Output('show-graphs-dropdown', 'value'),
-              [Input('show-graphs-dropdown', 'options')],
-              [State('show-graphs-dropdown', 'value')])
-def set_show_visualizations_dropdown_value(options, current_values):
-    if len(options) > 0:
-        if current_values is None:  # no value set
-            return list([options[-1]['value']])  # set last added option as value
-        else:  # at least one value present
-            current_values.append(options[-1]['value'])
-            return current_values
-
-
-@app.callback(Output('shown-vis-graphs', 'children'),
-              [Input('show-graphs-dropdown', 'value')],
-              [State('saved-vis-graphs', 'children')])
-def hide_visualizations(selected_graph_ids, saved_graphs):
-    result = []
-    if saved_graphs is None:
-        return result
-    else:
-        for graph in saved_graphs:
-            if graph['props']['id'] in selected_graph_ids:
-                result.append(graph.copy())
-        return result
-
-
-##########################
-# OUTPUT PANEL CALLBACKS #
-##########################
-@app.callback([Output('network', 'style'), Output('network-graph', 'children')],
-              [Input('draw-network-radio', 'value'),
-               Input('network-layout-dropdown', 'value'),
-               Input('dataset-dropdown', 'value')],
-              [State('dataset-dropdown', 'label'),
-               State('datasets', 'data')])
-def show_network(draw_network, layout, i, df_name, datasets):
-    if draw_network == 'yes' and i is not "":
-        df = getDataFrame(datasets, i)
-        set_of_nodes = set(df['source']) | set(df['target'])  # union of the sets of source and target nodes
-        nodes = [{'data': {'id': x, 'label': x}} for x in set_of_nodes]
-        edges = [{'data': {'source': row['source'], 'target': row['target']}} for _, row in df[['source', 'target']].iterrows()]
-        elements = nodes + edges
-
-        return {}, [html.H3(df_name), cyto.Cytoscape(
-            id='cytoscape-layout-1',
-            elements=elements,
-            style={'width': '100%', 'height': '350px'},
-            layout={
-                'name': layout
-            })]
-    else:
-        return {'display': 'none'}, []
-
-
-#########################
-# Testing with strings! #
-#########################
-@app.callback(Output('show-div-content', 'children'),
-              [Input('dataset-dropdown', 'value')],
-              [State('datasets', 'data')])
-def show_div_content(i, datasets):
-    if i is "":
-        raise PreventUpdate
-
-    df = getDataFrame(datasets, i)
-    return "{} has size {} MB".format(str(i), str(round(sys.getsizeof(df)/1000000, 2)))
-
+    # HIDDEN DIVS
+    html.Div(id='saved-vis-graphs', style={'display': 'none'}),
+])
 
 if __name__ == '__main__':
-    app.run_server(debug=True) # Might want to switch to processes=4
+    app.run_server(debug=True, port=8000) # Might want to switch to processes=4
