@@ -17,6 +17,8 @@ import json
 import itertools as it
 import sys
 import time
+from heapq import heapify, heappush, heappop
+import datetime
 
 import networkx as nx
 from algorithms2 import Dijkstra
@@ -127,7 +129,9 @@ def create_input_panel():
 
 def create_visualisation_panel():
     return html.Div(className='visualisation-panel', children=[
+                dcc.Store(id='dijkstra-info', storage_type='memory'),
                 dcc.Store(id='graph-info', storage_type='memory'),
+                dcc.Store(id='data-info', storage_type='memory'),
                 html.Div(className='vis-panel', children=[
                     html.H1('Visual analytics panel'),
                     dcc.Dropdown(id='show-graphs-dropdown', multi=True,
@@ -245,6 +249,36 @@ def append_new_graph(current_graphs, name, data, xlab, ylab):
         current_graphs.append(graph)
         return current_graphs
 
+
+def clean_dict(mydict):
+    """
+    Robust function that changes all indices to strings in a dict
+
+    :param mydict:      dictionary which might contain non-string keys
+    :return: mydict:    dictionary with only string keys
+    """
+    keys_to_change = []
+    for key, value in mydict.items():
+        if type(key) is not str:
+            keys_to_change.append(key)
+        if value == float('inf'):
+            mydict[key] = 'inf'
+
+    for key in keys_to_change:
+        mydict[str(key)] = mydict[key]
+        del mydict[key]
+
+    return mydict
+
+
+def get_memory_used(*args):
+    result = 0
+    for x in args:
+        result += sys.getsizeof(x)
+    return result
+
+def column(matrix, i):
+    return [row[i] for row in matrix]
 
 #########################
 # INPUT PANEL CALLBACKS #
@@ -390,30 +424,111 @@ def set_dijkstra_weight_value(use_weight_column, options):
 ####################################
 # VISUAL ANALYTICS PANEL CALLBACKS #
 ####################################
-@app.callback(Output('graph-info', 'data'),
-              [Input('dijkstra-run-button', 'n_clicks')],
-              [State('dataset-dropdown', 'label'),
-               State('datasets', 'data'), State('dijkstra-start-dropdown', 'value'),
+@app.callback([Output('dijkstra-info', 'data'),
+               Output('shown-vis-graphs', 'children'),
+               Output('graph-info', 'data'),
+               Output('data-info', 'data')],
+              [Input('dijkstra-run-button', 'n_clicks'),
+               Input('graph-info', 'modified_timestamp')],
+              [State('datasets', 'data'),
+               State('dijkstra-start-dropdown', 'value'),
                State('dijkstra-weight-dropdown', 'value'),
                State('dataset-dropdown', 'value'),
-               State('saved-vis-graphs', 'children'),
-               State('dijkstra-weight-radio', 'value')])
-def run_dijkstra(n_clicks, df_name, datasets, start, weight, i, current_graphs, use_weight_column):
+               State('dijkstra-weight-radio', 'value'),
+               State('dijkstra-info', 'data'),
+               State('graph-info', 'data')])
+def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations):
+    if n_clicks > 0 and i not in ("", None):
+        if prev_data in ("", None):
+            df = getDataFrame(datasets, i)
+
+            if use_weight_column == 'no':
+                df['weight'] = 1  # list of ones
+                weight = 'weight'
+
+            G = createDiGraph(df, weight)
+            return init_dijkstra(G, start), [], [], []
+        else:
+            data = {'t_added': time.time(),
+                    'dataset_number': i,
+                    'start': start,
+                    'weight': weight,
+                    'use_weight_column': use_weight_column,
+                    'iterations': []}
+            Q, dist, prev, neighs = prev_data
+            if iterations is None:
+                iterations = []
+            output = iter_dijkstra(Q, dist, prev, neighs, iterations)
+
+            data['iterations'] = output[3]
+
+            return output[0], output[2], output[1], data
+    else:
+        raise PreventUpdate
+
+
+def init_dijkstra(G, start):
     Q = list()
     dist = dict()
     prev = dict()
-    if n_clicks > 0 and i not in ("", None):
-        df = getDataFrame(datasets, i)
+    neighs = dict()
 
-        if use_weight_column == 'no':
-            df['weight'] = 1  # list of ones
-            weight = 'weight'
+    dist[start] = 0
+    for v in G.nodes:
+        neighs[v] = []
+        for x in nx.neighbors(G, v):
+            neighs[v].append([x, G.edges[v, x]['weight']])
+        if v != start:
+            dist[v] = float('inf')
+        prev[v] = None
+        heappush(Q, (dist[v], v))  # insert v, maintaining min heap property
 
-        G = createDiGraph(df, weight)
-        Q, dist, prev = Dijkstra(G, start, weight).init_dijkstra()  # Dijkstra's algorithm as generator
+    alg_output = [Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)]
 
-    return [Q, dist, prev]
+    return alg_output
 
+
+def iter_dijkstra(Q, dist, prev, neighs, iterations):
+    if Q not in (None, []):
+        t_start = time.time()  # keep track of time
+        for q in Q:
+            if q[0] is None:
+                q[0] = float("inf")
+
+        dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
+        neighs_u = neighs[str(u)]
+        for v_inf in neighs_u:
+            alt = dist_u + v_inf[1]  # dist(source, u) + dist(u, v)
+            if dist[str(v_inf[0])] == "inf" or alt < dist[str(v_inf[0])]:
+                dist[str(v_inf[0])] = alt
+                prev[str(v_inf[0])] = u
+                heappush(Q, [alt, v_inf[0]])
+
+        t_elapsed = time.time() - t_start
+        timestamp = datetime.datetime.now()
+        memory_used = get_memory_used(Q, dist, prev, neighs_u)
+        iterations.append([len(iterations), t_elapsed, memory_used])
+        data = {'t': t_elapsed,
+                'memory': memory_used,
+                'Q': Q,
+                'u': u,
+                'v': neighs_u[0],
+                'neighs_u': neighs_u,
+                'dist': dist,
+                'prev': prev}
+    else:
+        raise PreventUpdate
+
+    alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)], iterations,
+                    append_new_graph(
+                        [],
+                        name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(1),
+                        data=[{'x': column(iterations, 0), 'y': column(iterations, 2), 'type': 'bar', 'name': 'SF'}],
+                        xlab='iteration number',
+                        ylab='time (s)'
+                    ), data]
+
+    return alg_output
 
 
 ##############

@@ -315,7 +315,6 @@ def set_algorithm_value(available_options):
         return available_options[0]['value']
 
 
-
 @app.callback([Output('dijkstra-settings', 'style'),
                Output('bellman-ford-settings', 'style'),
                Output('floyd-warshall-settings', 'style'),
