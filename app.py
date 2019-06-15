@@ -19,7 +19,7 @@ import sys
 import time
 
 import networkx as nx
-from algorithms import Dijkstra
+from algorithms import Dijkstra, Prim
 
 ####################
 #   APP SETTINGS   #
@@ -55,7 +55,6 @@ app.layout = html.Div(id='main-body', children=[
         html.Div('Supported file types are csv, json, '
                  'xls, dta, xpt and pkl.'),
 
-
         dcc.Loading(id="loading-data",
                     children=[dcc.Upload(
                                 id='upload-field',
@@ -81,7 +80,7 @@ app.layout = html.Div(id='main-body', children=[
         dcc.Dropdown(
             id="algorithm-type-dropdown",
             options=[{'label': x, 'value': x} for x in algorithms.keys()],
-            value=[x for x in algorithms.keys()][0]  # dumb workaround; dict.keys() doesn't support indexing
+            value=[x for x in algorithms.keys()][1]  # dumb workaround; dict.keys() doesn't support indexing
         ),
         html.P('Select algorithm to run'),
         dcc.Dropdown(id='algorithm-dropdown'),
@@ -119,7 +118,19 @@ app.layout = html.Div(id='main-body', children=[
                 html.H3('Settings'),]),
             # Prim
             html.Div(id='prim-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),]),
+                html.H3('Settings'),
+                html.P('Select start node'),
+                dcc.Dropdown(id='prim-start-dropdown'),
+                html.P('Edge weights:'),
+                dcc.RadioItems(
+                    id='prim-weight-radio',
+                    options=[{'label': 'Edge weights all equal to 1', 'value': 'no'},
+                             {'label': 'Use column in dataset as edge weights', 'value': 'yes'}],
+                    value='no',
+                    labelStyle={'display': 'inline-block'}
+                ),
+                dcc.Dropdown(id='prim-weight-dropdown', style={'display': 'none'}),
+                html.Button(id='prim-run-button', n_clicks=0, children='Run algorithm', type='submit')]),
             # Ford-Fulkerson
             html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[
                 html.H3('Settings'),])
@@ -154,6 +165,7 @@ app.layout = html.Div(id='main-body', children=[
 
     # HIDDEN DIVS
     html.Div(id='saved-vis-graphs', style={'display': 'none'}),
+    html.Div(id='prim-vis-graphs', style={'display': 'none'}),
 ])
 
 
@@ -208,6 +220,15 @@ def getDataFrame(datasets, i):
 
 def createDiGraph(df, weight):
     G1 = nx.DiGraph()
+    if weight in df.columns:
+        G1.add_weighted_edges_from(zip(df['source'], df['target'], df[weight]))
+    else:
+        G1.add_edges_from(zip(df['source'], df['target']))
+    return G1
+
+
+def createGraph(df, weight):
+    G1 = nx.Graph()
     if weight in df.columns:
         G1.add_weighted_edges_from(zip(df['source'], df['target'], df[weight]))
     else:
@@ -312,7 +333,7 @@ def set_algorithm_value(available_options):
     if available_options is None or len(available_options) == 0:
         return None
     else:
-        return available_options[0]['value']
+        return available_options[1]['value']
 
 
 @app.callback([Output('dijkstra-settings', 'style'),
@@ -390,6 +411,66 @@ def set_dijkstra_weight_value(use_weight_column, options):
         return {'display': 'none'}, ''
 
 
+# Prim callbacks
+# TODO account for possible changes in Graph object
+@app.callback(Output('prim-start-dropdown', 'options'),
+              [Input('prim-settings', 'style'),
+               Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def set_prim_start_options(style, i, datasets):
+    if datasets is None or i is "":
+        raise PreventUpdate
+
+    if 'display' in style.keys() and style['display'] == 'none':
+        return []
+    else:
+        # TODO fix graph/dataset met callbacks
+        df = getDataFrame(datasets, i)
+        G1 = createDiGraph(df, "")
+        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
+
+
+@app.callback(Output('prim-start-dropdown', 'value'),
+              [Input('prim-start-dropdown', 'options')])
+def set_prim_start_value(options):
+    if len(options) > 0:
+        return options[0]['value']
+    else:
+        return None
+
+
+@app.callback(Output('prim-weight-dropdown', 'options'),
+              [Input('prim-settings', 'style'),
+               Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def set_prim_weight_options(style, i, datasets):
+    if datasets is None or i is "":
+        raise PreventUpdate
+
+    df = getDataFrame(datasets, i)
+
+    if 'display' in style.keys() and style['display'] == 'none':
+        return []
+    else:
+        # TODO fix graph/dataset met callbacks
+        return [{'label': x, 'value': x} for x in df.columns]
+
+
+@app.callback([Output('prim-weight-dropdown', 'style'),
+               Output('prim-weight-dropdown', 'value')],
+              [Input('prim-weight-radio', 'value')],
+              [State('prim-weight-dropdown', 'options')])
+def set_prim_weight_value(use_weight_column, options):
+    if use_weight_column == 'yes':
+        if len(options) > 0:
+            if 'weight' in [x['value'] for x in options]:
+                return {}, 'weight'
+            else:
+                return {}, options[0]['value']
+    else:
+        return {'display': 'none'}, ''
+
+
 ####################################
 # VISUAL ANALYTICS PANEL CALLBACKS #
 ####################################
@@ -435,15 +516,70 @@ def run_dijkstra(n_clicks, df_name, datasets, start, weight, i, current_graphs, 
             ylab='memory (MB)'
         )
         return current_graphs
+    else:
+        raise PreventUpdate
+
+
+@app.callback(Output('prim-vis-graphs', 'children'),
+              [Input('prim-run-button', 'n_clicks')],
+              [State('prim-start-dropdown', 'label'),
+               State('datasets', 'data'),
+               State('prim-start-dropdown', 'value'),
+               State('prim-weight-dropdown', 'value'),
+               State('dataset-dropdown', 'value'),
+               State('prim-vis-graphs', 'children'),
+               State('prim-weight-radio', 'value')])
+def run_prim(n_clicks, df_name, datasets, start, weight, i, current_graphs, use_weight_column):
+    if n_clicks > 0 and i not in ("", None):
+        df = getDataFrame(datasets, i)
+
+        if use_weight_column == 'no':
+            df['weight'] = 1  # list of ones
+            weight = 'weight'
+
+        G = createGraph(df, weight)
+        prim = Prim(G, start, weight).prim()  # Prim's algorithm as generator
+        timestamp = []
+        time = []
+        memory_use = []
+
+        for memory, t, tstamp, Q, v, neighs_u, dist, order in prim:
+            time.append(t)
+            timestamp.append(tstamp)
+            memory_use.append(memory/1000000)  # in megabytes
+
+        current_graphs = append_new_graph(
+            current_graphs,
+            name='Alg:Prim | Data:{} | Type:Runtime | Run:'.format(df_name),
+            data=[{'x': timestamp, 'y': time, 'type': 'bar', 'name': 'SF'}],
+            xlab='iteration number',
+            ylab='time (s)'
+        )
+        current_graphs = append_new_graph(
+            current_graphs,
+            name='Alg:Prim | Data:{} | Type:Memory | Run:'.format(df_name),
+            data=[{'x': timestamp, 'y': memory_use, 'type': 'bar', 'name': 'SF'}],
+            xlab='iteration number',
+            ylab='memory (MB)'
+        )
+        return current_graphs
+    else:
+        raise PreventUpdate
 
 
 @app.callback(Output('show-graphs-dropdown', 'options'),
-              [Input('saved-vis-graphs', 'children')])
-def set_show_visualizations_dropdown_options(current_graphs):
-    if current_graphs is None:
-        return []
-    else:
-        return [{'label': graph['props']['id'], 'value': graph['props']['id']} for graph in current_graphs]
+              [Input('saved-vis-graphs', 'children'),
+               Input('prim-vis-graphs', 'children')])
+def set_show_visualizations_dropdown_options(current_dijkstra_graphs, current_prim_graphs):
+    current_graphs = []
+
+    if current_dijkstra_graphs is not None:
+        current_graphs.extend(current_dijkstra_graphs)
+
+    if current_prim_graphs is not None:
+        current_graphs.extend(current_prim_graphs)
+
+    return [{'label': graph['props']['id'], 'value': graph['props']['id']} for graph in current_graphs]
 
 
 @app.callback(Output('show-graphs-dropdown', 'value'),
@@ -460,16 +596,22 @@ def set_show_visualizations_dropdown_value(options, current_values):
 
 @app.callback(Output('shown-vis-graphs', 'children'),
               [Input('show-graphs-dropdown', 'value')],
-              [State('saved-vis-graphs', 'children')])
-def hide_visualizations(selected_graph_ids, saved_graphs):
+              [State('saved-vis-graphs', 'children'),
+               State('prim-vis-graphs', 'children')])
+def hide_visualizations(selected_graph_ids, saved_dijkstra_graphs, saved_prim_graphs):
     result = []
-    if saved_graphs is None:
-        return result
-    else:
-        for graph in saved_graphs:
-            if graph['props']['id'] in selected_graph_ids:
-                result.append(graph.copy())
-        return result
+    saved_graphs = []
+
+    if saved_dijkstra_graphs is not None:
+        saved_graphs.extend(saved_dijkstra_graphs)
+
+    if saved_prim_graphs is not None:
+        saved_graphs.extend(saved_prim_graphs)
+
+    for graph in saved_graphs:
+        if graph['props']['id'] in selected_graph_ids:
+            result.append(graph.copy())
+    return result
 
 
 ##########################

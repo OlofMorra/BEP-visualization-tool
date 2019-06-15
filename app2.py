@@ -489,6 +489,7 @@ def init_dijkstra(G, start):
 
 
 def iter_dijkstra(Q, dist, prev, neighs, iterations):
+    data = dict()
     if Q not in (None, []):
         t_start = time.time()  # keep track of time
         for q in Q:
@@ -504,18 +505,18 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations):
                 prev[str(v_inf[0])] = u
                 heappush(Q, [alt, v_inf[0]])
 
-        t_elapsed = time.time() - t_start
-        timestamp = datetime.datetime.now()
-        memory_used = get_memory_used(Q, dist, prev, neighs_u)
-        iterations.append([len(iterations), t_elapsed, memory_used])
-        data = {'t': t_elapsed,
-                'memory': memory_used,
-                'Q': Q,
-                'u': u,
-                'v': neighs_u[0],
-                'neighs_u': neighs_u,
-                'dist': dist,
-                'prev': prev}
+            t_elapsed = time.time() - t_start
+            timestamp = datetime.datetime.now()
+            memory_used = get_memory_used(Q, dist, prev, neighs_u)
+            iterations.append([len(iterations), t_elapsed, memory_used])
+            data = {'t': t_elapsed,
+                    'memory': memory_used,
+                    'Q': Q,
+                    'u': u,
+                    'v': neighs_u[0],
+                    'neighs_u': neighs_u,
+                    'dist': dist,
+                    'prev': prev}
     else:
         raise PreventUpdate
 
