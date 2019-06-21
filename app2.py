@@ -216,38 +216,29 @@ def createDiGraph(df, weight):
     return G1
 
 
-def append_new_graph(current_graphs, name, data, xlab, ylab):
+def append_new_graph(current_graphs, length, name, data, xlab, ylab):
     if current_graphs is None:
         name = name + str(1)  # id number corresponding to index in the list of graphs
-        graph = dcc.Graph(
-            id=name,
-            figure={
-                'data': data,
-                'layout': go.Layout(
-                    title={'text': name},
-                    xaxis={'title': xlab,
-                           'rangeslider' : {'visible': True},
-                            'type' : 'date',
-                           'tickformat':'%M~%S~%L'},
-                    yaxis={'title': ylab}
-                )}
-        )
-        return list([graph])
+        current_graphs = []
     else:
         name = name + str(len(current_graphs) + 1)  # id number corresponding to index in the list of graphs
-        graph = dcc.Graph(
-            id=name,
-            figure={
-                'data': data,
-                'layout': go.Layout(
-                    title={'text': name}, xaxis={'title': xlab,
-                           'rangeslider' : {'visible': True},
-                            'type' : 'date',
-                           'tickformat':'%M~%S~%L'}, yaxis={'title': ylab}
-                )}
-        )
-        current_graphs.append(graph)
-        return current_graphs
+
+    graph = dcc.Graph(
+        id=name,
+        figure={
+            'data': data,
+            'layout': go.Layout(
+                title={'text': name},
+                xaxis={'title': xlab,
+                       'rangeslider': {'visible': True},
+                       'tickmode': 'linear',
+                       'dtick' : int(length/50)},
+                yaxis={'title': ylab}
+            )}
+    )
+
+    current_graphs.append(graph)
+    return current_graphs
 
 
 def clean_dict(mydict):
@@ -275,7 +266,8 @@ def get_memory_used(*args):
     result = 0
     for x in args:
         result += sys.getsizeof(x)
-    return result
+    return result/1000000
+
 
 def column(matrix, i):
     return [row[i] for row in matrix]
@@ -407,7 +399,8 @@ def set_dijkstra_weight_options(style, i, datasets):
         return [{'label': x, 'value': x} for x in df.columns]
 
 
-@app.callback([Output('dijkstra-weight-dropdown', 'style'), Output('dijkstra-weight-dropdown', 'value')],
+@app.callback([Output('dijkstra-weight-dropdown', 'style'),
+               Output('dijkstra-weight-dropdown', 'value')],
               [Input('dijkstra-weight-radio', 'value')],
               [State('dijkstra-weight-dropdown', 'options')])
 def set_dijkstra_weight_value(use_weight_column, options):
@@ -424,12 +417,22 @@ def set_dijkstra_weight_value(use_weight_column, options):
 ####################################
 # VISUAL ANALYTICS PANEL CALLBACKS #
 ####################################
+@app.callback(Output('dijkstra-run-button', 'n_clicks'),
+              [Input('dijkstra-info', 'data')])
+def end_dijkstra(data):
+    if data in (None, []):
+        raise PreventUpdate
+    elif data[0][0][0] is None:
+        return 0
+    else:
+        return 2
+
+
 @app.callback([Output('dijkstra-info', 'data'),
-               Output('shown-vis-graphs', 'children'),
                Output('graph-info', 'data'),
                Output('data-info', 'data')],
               [Input('dijkstra-run-button', 'n_clicks'),
-               Input('graph-info', 'modified_timestamp')],
+               Input('data-info', 'modified_timestamp')],
               [State('datasets', 'data'),
                State('dijkstra-start-dropdown', 'value'),
                State('dijkstra-weight-dropdown', 'value'),
@@ -439,7 +442,7 @@ def set_dijkstra_weight_value(use_weight_column, options):
                State('graph-info', 'data')])
 def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations):
     if n_clicks > 0 and i not in ("", None):
-        if prev_data in ("", None):
+        if n_clicks == 1:
             df = getDataFrame(datasets, i)
 
             if use_weight_column == 'no':
@@ -447,7 +450,7 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
                 weight = 'weight'
 
             G = createDiGraph(df, weight)
-            return init_dijkstra(G, start), [], [], []
+            return init_dijkstra(G, start), [], []
         else:
             data = {'t_added': time.time(),
                     'dataset_number': i,
@@ -460,11 +463,11 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
                 iterations = []
             output = iter_dijkstra(Q, dist, prev, neighs, iterations)
 
-            data['iterations'] = output[3]
+            data['iterations'] = output[1]
 
-            return output[0], output[2], output[1], data
+            return output[0], output[1], data
     else:
-        raise PreventUpdate
+        return [], [], []
 
 
 def init_dijkstra(G, start):
@@ -497,6 +500,7 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations):
                 q[0] = float("inf")
 
         dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
+
         neighs_u = neighs[str(u)]
         for v_inf in neighs_u:
             alt = dist_u + v_inf[1]  # dist(source, u) + dist(u, v)
@@ -505,7 +509,7 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations):
                 prev[str(v_inf[0])] = u
                 heappush(Q, [alt, v_inf[0]])
 
-            t_elapsed = time.time() - t_start
+            t_elapsed = (time.time() - t_start)*1000
             timestamp = datetime.datetime.now()
             memory_used = get_memory_used(Q, dist, prev, neighs_u)
             iterations.append([len(iterations), t_elapsed, memory_used])
@@ -520,16 +524,103 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations):
     else:
         raise PreventUpdate
 
-    alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)], iterations,
-                    append_new_graph(
-                        [],
-                        name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(1),
-                        data=[{'x': column(iterations, 0), 'y': column(iterations, 2), 'type': 'bar', 'name': 'SF'}],
-                        xlab='iteration number',
-                        ylab='time (s)'
-                    ), data]
+    alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)], iterations, data]
 
     return alg_output
+
+
+@app.callback(Output('saved-vis-graphs', 'children'),
+              [Input('graph-info', 'modified_timestamp')],
+              [State('saved-vis-graphs', 'children'),
+               State('graph-info', 'data')])
+def add_dijkstra_graphs(t, current_graphs, graph_data):
+    if graph_data not in (None, []):
+        if len(graph_data) > 2:
+            current_graphs = current_graphs[:-2]
+
+        time_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 1))
+        memory_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 2))
+
+        length = len(graph_data)
+
+        current_graphs = append_new_graph(
+            current_graphs,
+            length,
+            name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(1),
+            data=[time_trace],
+            xlab='iteration number',
+            ylab='time (ms)'
+        )
+
+        current_graphs = append_new_graph(
+            current_graphs,
+            length,
+            name='Alg:dijkstra | Data:{} | Type:Memory | Run:'.format(1),
+            data=[memory_trace],
+            xlab='iteration number',
+            ylab='Memory (MB)',)
+
+        return current_graphs
+    else:
+        raise PreventUpdate
+
+
+@app.callback([Output('show-graphs-dropdown', 'options'),
+               Output('show-graphs-dropdown', 'value')],
+              [Input('saved-vis-graphs', 'children')])
+def set_show_visualizations_dropdown_options(current_dijkstra_graphs):
+    current_graphs = []
+
+    if current_dijkstra_graphs is not None:
+        current_graphs.extend(current_dijkstra_graphs)
+
+    options = [{'label': graph['props']['id'], 'value': graph['props']['id']} for graph in current_graphs]
+    value = [options[-2]["value"], options[-1]["value"]] if len(options) > 1 else []
+
+    return options, value
+
+
+@app.callback(Output('shown-vis-graphs', 'children'),
+              [Input('show-graphs-dropdown', 'value')],
+              [State('saved-vis-graphs', 'children')])
+def hide_visualizations(selected_graph_ids, saved_dijkstra_graphs):
+    result = []
+    saved_graphs = []
+
+    if saved_dijkstra_graphs is not None:
+        saved_graphs.extend(saved_dijkstra_graphs)
+
+    for graph in saved_graphs:
+        if graph['props']['id'] in selected_graph_ids:
+            result.append(graph.copy())
+    return result
+
+##########################
+# OUTPUT PANEL CALLBACKS #
+##########################
+@app.callback([Output('network', 'style'), Output('network-graph', 'children')],
+              [Input('draw-network-radio', 'value'),
+               Input('network-layout-dropdown', 'value'),
+               Input('dataset-dropdown', 'value')],
+              [State('dataset-dropdown', 'label'),
+               State('datasets', 'data')])
+def show_network(draw_network, layout, i, df_name, datasets):
+    if draw_network == 'yes' and i is not "":
+        df = getDataFrame(datasets, i)
+        set_of_nodes = set(df['source']) | set(df['target'])  # union of the sets of source and target nodes
+        nodes = [{'data': {'id': x, 'label': x}} for x in set_of_nodes]
+        edges = [{'data': {'source': row['source'], 'target': row['target']}} for _, row in df[['source', 'target']].iterrows()]
+        elements = nodes + edges
+
+        return {}, [html.H3(df_name), cyto.Cytoscape(
+            id='cytoscape-layout-1',
+            elements=elements,
+            style={'width': '100%', 'height': '350px'},
+            layout={
+                'name': layout
+            })]
+    else:
+        return {'display': 'none'}, []
 
 
 ##############
@@ -550,4 +641,4 @@ app.layout = html.Div(id='main-body', children=[
 ])
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000) # Might want to switch to processes=4
+    app.run_server(debug=True, port=8000)  # Might want to switch to processes=4

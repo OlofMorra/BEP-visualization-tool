@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app2.py" beforeDir="false" afterPath="$PROJECT_DIR$/app2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/style.css" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -40,8 +37,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="387">
-              <caret line="548" column="61" selection-start-line="548" selection-start-column="61" selection-end-line="548" selection-end-column="61" />
+            <state relative-caret-position="310">
+              <caret line="503" column="42" lean-forward="true" selection-start-line="503" selection-start-column="42" selection-end-line="503" selection-end-column="42" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -49,14 +46,35 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/algorithms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="633">
-              <caret line="145" column="69" selection-start-line="145" selection-start-column="69" selection-end-line="145" selection-end-column="69" />
+            <state relative-caret-position="297">
+              <caret line="61" column="26" selection-start-line="61" selection-start-column="26" selection-end-line="61" selection-end-column="26" />
               <folding>
                 <element signature="e#235#254#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app2.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="473">
+              <caret line="537" column="8" lean-forward="true" selection-start-line="537" selection-start-column="8" selection-end-line="538" selection-end-column="48" />
+              <folding>
+                <element signature="e#24#35#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/assets/style.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="450">
+              <caret line="30" column="17" selection-start-line="30" selection-start-column="17" selection-end-line="30" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -78,9 +96,9 @@
       <find>int</find>
       <find>dijkstra</find>
       <find>prim</find>
-      <find>saved-vis</find>
       <find>vis-graphs</find>
       <find>prim-dropdown</find>
+      <find>saved-vis</find>
     </findStrings>
     <replaceStrings>
       <replace>prim</replace>
@@ -115,23 +133,42 @@
         <option value="$PROJECT_DIR$/testApp.py" />
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/algorithms2.py" />
-        <option value="$PROJECT_DIR$/app2.py" />
         <option value="$PROJECT_DIR$/assets/style.css" />
         <option value="$PROJECT_DIR$/algorithms.py" />
         <option value="$PROJECT_DIR$/app.py" />
+        <option value="$PROJECT_DIR$/app2.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="24" />
-    <option name="width" value="1440" />
-    <option name="height" value="877" />
+    <option name="x" value="61" />
+    <option name="y" value="60" />
+    <option name="width" value="1318" />
+    <option name="height" value="803" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
+              <item name="assets" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -224,6 +261,8 @@
       <workItem from="1560084065410" duration="14000" />
       <workItem from="1560084110375" duration="1504000" />
       <workItem from="1560606065692" duration="13816000" />
+      <workItem from="1560872621234" duration="834000" />
+      <workItem from="1560944906711" duration="24511000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
@@ -320,7 +359,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="120213000" />
+    <option name="totallyTimeSpent" value="145558000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -332,10 +371,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="877" extended-state="0" />
+    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" weight="0.10744811" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.108726755" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5007924" side_tool="true" weight="0.15884861" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -361,12 +400,12 @@
       <window_info active="true" anchor="right" id="Terminal" order="9" visible="true" weight="0.3576538" />
     </layout>
     <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.10744811" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.108726755" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5007924" side_tool="true" weight="0.15884861" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.30610022" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.20127389" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39978212" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -374,7 +413,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.22048193" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.22038217" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -384,7 +423,7 @@
       <window_info anchor="right" id="Database" order="6" weight="0.32967034" />
       <window_info anchor="right" id="Version Control" order="7" side_tool="true" weight="0.32539684" />
       <window_info anchor="right" x="0" y="0" width="310" height="700" id="Documentation" order="8" side_tool="true" weight="0.3297568" />
-      <window_info active="true" anchor="right" id="Terminal" order="9" visible="true" weight="0.2936508" />
+      <window_info anchor="right" id="Terminal" order="9" visible="true" weight="0.35622317" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -482,32 +521,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app2.py">
+    <entry file="file://$PROJECT_DIR$/algorithms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="65" column="36" selection-start-line="65" selection-start-column="36" selection-end-line="65" selection-end-column="36" />
+        <state relative-caret-position="297">
+          <caret line="61" column="26" selection-start-line="61" selection-start-column="26" selection-end-line="61" selection-end-column="26" />
           <folding>
-            <element signature="e#24#35#0" expanded="true" />
+            <element signature="e#235#254#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="387">
-          <caret line="548" column="61" selection-start-line="548" selection-start-column="61" selection-end-line="548" selection-end-column="61" />
+        <state relative-caret-position="310">
+          <caret line="503" column="42" lean-forward="true" selection-start-line="503" selection-start-column="42" selection-end-line="503" selection-end-column="42" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/algorithms.py">
+    <entry file="file://$PROJECT_DIR$/app2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="633">
-          <caret line="145" column="69" selection-start-line="145" selection-start-column="69" selection-end-line="145" selection-end-column="69" />
+        <state relative-caret-position="473">
+          <caret line="537" column="8" lean-forward="true" selection-start-line="537" selection-start-column="8" selection-end-line="538" selection-end-column="48" />
           <folding>
-            <element signature="e#235#254#0" expanded="true" />
+            <element signature="e#24#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
