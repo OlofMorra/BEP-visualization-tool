@@ -132,6 +132,7 @@ def create_visualisation_panel():
                 dcc.Store(id='dijkstra-info', storage_type='memory'),
                 dcc.Store(id='graph-info', storage_type='memory'),
                 dcc.Store(id='data-info', storage_type='memory'),
+                dcc.Store(id='dynamic-graph-info', storage_type='memory'),
                 html.Div(className='vis-panel', children=[
                     html.H1('Visual analytics panel'),
                     dcc.Dropdown(id='show-graphs-dropdown', multi=True,
@@ -216,7 +217,7 @@ def createDiGraph(df, weight):
     return G1
 
 
-def append_new_graph(current_graphs, length, name, data, xlab, ylab):
+def append_new_time_series(current_graphs, length, name, data, xlab, ylab):
     if current_graphs is None:
         name = name + str(1)  # id number corresponding to index in the list of graphs
         current_graphs = []
@@ -239,6 +240,55 @@ def append_new_graph(current_graphs, length, name, data, xlab, ylab):
 
     current_graphs.append(graph)
     return current_graphs
+
+
+def append_new_dynamic_graph(current_graphs, name, data, xlab):
+    if current_graphs is None:
+        name = name + str(1)  # id number corresponding to index in the list of graphs
+        current_graphs = []
+    else:
+        name = name + str(len(current_graphs) + 1)  # id number corresponding to index in the list of graphs
+
+    length = len(data)
+
+    graph = dcc.Graph(
+        id=name,
+        figure={
+            'data': [],
+            'layout': go.Layout(
+                title=name,
+                titlefont=dict(size=16),
+                showlegend=False,
+                hovermode='closest',
+                margin=dict(b=20, l=5, r=5, t=40),
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))}
+    )
+
+    current_graphs.append(graph)
+    return current_graphs
+
+
+def extend_dynamic_graph(dynamic_graph, data):
+    if len(data) > 0:
+        # TODO Add length of iterations that are already added to the dynamic graph
+        # Is not the length of the number of traces, but max x of dynamic_graph
+        if dynamic_graph['props']['figure']['data'] != []:
+            l = dynamic_graph['props']['figure']['data'][-1]['x'][0]
+        else:
+            l = 0
+
+        for i, iteration in enumerate(data):
+            for node in iteration.keys():
+                if iteration[node] is not None:
+                    edge_trace = go.Scatter(
+                        x=[l + (i+1), l + (i+1) + 1],
+                        y=[iteration[node], int(node)],
+                        line=dict(width=0.5, color='#888'),
+                        hoverinfo='none',
+                        mode='lines')
+                    dynamic_graph['props']['figure']['data'].append(edge_trace)
+    return dynamic_graph
 
 
 def clean_dict(mydict):
@@ -338,7 +388,6 @@ def set_algorithm_value(available_options):
         return available_options[0]['value']
 
 
-
 @app.callback([Output('dijkstra-settings', 'style'),
                Output('bellman-ford-settings', 'style'),
                Output('floyd-warshall-settings', 'style'),
@@ -430,7 +479,8 @@ def end_dijkstra(data):
 
 @app.callback([Output('dijkstra-info', 'data'),
                Output('graph-info', 'data'),
-               Output('data-info', 'data')],
+               Output('data-info', 'data'),
+               Output('dynamic-graph-info', 'data')],
               [Input('dijkstra-run-button', 'n_clicks'),
                Input('data-info', 'modified_timestamp')],
               [State('datasets', 'data'),
@@ -439,8 +489,10 @@ def end_dijkstra(data):
                State('dataset-dropdown', 'value'),
                State('dijkstra-weight-radio', 'value'),
                State('dijkstra-info', 'data'),
-               State('graph-info', 'data')])
-def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations):
+               State('graph-info', 'data'),
+               State('dynamic-graph-info', 'data')])
+def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations,
+             dynamic_graph_data):
     if n_clicks > 0 and i not in ("", None):
         if n_clicks == 1:
             df = getDataFrame(datasets, i)
@@ -450,7 +502,7 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
                 weight = 'weight'
 
             G = createDiGraph(df, weight)
-            return init_dijkstra(G, start), [], []
+            return init_dijkstra(G, start), [], [], []
         else:
             data = {'t_added': time.time(),
                     'dataset_number': i,
@@ -461,13 +513,15 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
             Q, dist, prev, neighs = prev_data
             if iterations is None:
                 iterations = []
-            output = iter_dijkstra(Q, dist, prev, neighs, iterations)
+            output = iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data)
 
             data['iterations'] = output[1]
 
-            return output[0], output[1], data
+            print(data)
+
+            return output[0], output[1], data, output[3]
     else:
-        return [], [], []
+        return [], iterations, [], dynamic_graph_data
 
 
 def init_dijkstra(G, start):
@@ -491,40 +545,43 @@ def init_dijkstra(G, start):
     return alg_output
 
 
-def iter_dijkstra(Q, dist, prev, neighs, iterations):
-    data = dict()
-    if Q not in (None, []):
-        t_start = time.time()  # keep track of time
-        for q in Q:
-            if q[0] is None:
-                q[0] = float("inf")
+def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data):
+    dynamic_graph_data = []
+    for i in range(0, 1):
+        data = dict()
+        if Q not in (None, []) and Q[0][0] != float("inf"):
+            t_start = time.time()  # keep track of time
+            for q in Q:
+                if q[0] is None:
+                    q[0] = float("inf")
 
-        dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
+            dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
 
-        neighs_u = neighs[str(u)]
-        for v_inf in neighs_u:
-            alt = dist_u + v_inf[1]  # dist(source, u) + dist(u, v)
-            if dist[str(v_inf[0])] == "inf" or alt < dist[str(v_inf[0])]:
-                dist[str(v_inf[0])] = alt
-                prev[str(v_inf[0])] = u
-                heappush(Q, [alt, v_inf[0]])
+            neighs_u = neighs[str(u)]
+            for v_inf in neighs_u:
+                alt = dist_u + v_inf[1]  # dist(source, u) + dist(u, v)
+                if dist[str(v_inf[0])] == "inf" or alt < dist[str(v_inf[0])]:
+                    dist[str(v_inf[0])] = alt
+                    prev[str(v_inf[0])] = u
+                    heappush(Q, [alt, v_inf[0]])
 
-            t_elapsed = (time.time() - t_start)*1000
-            timestamp = datetime.datetime.now()
-            memory_used = get_memory_used(Q, dist, prev, neighs_u)
-            iterations.append([len(iterations), t_elapsed, memory_used])
-            data = {'t': t_elapsed,
-                    'memory': memory_used,
-                    'Q': Q,
-                    'u': u,
-                    'v': neighs_u[0],
-                    'neighs_u': neighs_u,
-                    'dist': dist,
-                    'prev': prev}
-    else:
-        raise PreventUpdate
+                t_elapsed = (time.time() - t_start)*1000
+                timestamp = datetime.datetime.now()
+                memory_used = get_memory_used(Q, dist, prev, neighs_u)
 
-    alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)], iterations, data]
+                iterations.append([len(iterations), t_elapsed, memory_used])
+                data = {'t': t_elapsed,
+                        'memory': memory_used,
+                        'Q': Q,
+                        'u': u,
+                        'v': neighs_u[0],
+                        'neighs_u': neighs_u,
+                        'dist': dist,
+                        'prev': prev}
+
+            dynamic_graph_data.append(prev)
+
+    alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)], iterations, data, dynamic_graph_data]
 
     return alg_output
 
@@ -532,33 +589,47 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations):
 @app.callback(Output('saved-vis-graphs', 'children'),
               [Input('graph-info', 'modified_timestamp')],
               [State('saved-vis-graphs', 'children'),
-               State('graph-info', 'data')])
-def add_dijkstra_graphs(t, current_graphs, graph_data):
-    if graph_data not in (None, []):
-        if len(graph_data) > 2:
+               State('graph-info', 'data'),
+               State('dynamic-graph-info', 'data')])
+def add_dijkstra_graphs(t, current_graphs, graph_data, dynamic_graph_data):
+    if graph_data is not None:
+        if graph_data == []:
+            current_graphs = append_new_dynamic_graph(current_graphs,
+                                                      name='Alg: Dijkstra | Data: {} | Type: Dynamic Graph | Run:'.format(1),
+                                                      data=[],
+                                                      xlab='iteration number')
+            current_graphs = append_new_time_series(current_graphs, 1, name='1', data=[], xlab='', ylab='')
+            current_graphs = append_new_time_series(current_graphs, 1, name='2', data=[], xlab='', ylab='')
+        else:
             current_graphs = current_graphs[:-2]
 
-        time_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 1))
-        memory_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 2))
+            current_graphs[-1] = extend_dynamic_graph(
+                current_graphs[-1],
+                data=dynamic_graph_data
+            )
 
-        length = len(graph_data)
+            time_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 1))
+            memory_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 2))
 
-        current_graphs = append_new_graph(
-            current_graphs,
-            length,
-            name='Alg:dijkstra | Data:{} | Type:Runtime | Run:'.format(1),
-            data=[time_trace],
-            xlab='iteration number',
-            ylab='time (ms)'
-        )
+            length = len(graph_data)
 
-        current_graphs = append_new_graph(
-            current_graphs,
-            length,
-            name='Alg:dijkstra | Data:{} | Type:Memory | Run:'.format(1),
-            data=[memory_trace],
-            xlab='iteration number',
-            ylab='Memory (MB)',)
+            current_graphs = append_new_time_series(
+                current_graphs,
+                length,
+                name='Alg: Dijkstra | Data: {} | Type: Runtime | Run:'.format(1),
+                data=[time_trace],
+                xlab='iteration number',
+                ylab='time (ms)'
+            )
+
+            current_graphs = append_new_time_series(
+                current_graphs,
+                length,
+                name='Alg: Dijkstra | Data: {} | Type: Memory | Run:'.format(1),
+                data=[memory_trace],
+                xlab='iteration number',
+                ylab='Memory (MB)'
+            )
 
         return current_graphs
     else:
@@ -575,7 +646,7 @@ def set_show_visualizations_dropdown_options(current_dijkstra_graphs):
         current_graphs.extend(current_dijkstra_graphs)
 
     options = [{'label': graph['props']['id'], 'value': graph['props']['id']} for graph in current_graphs]
-    value = [options[-2]["value"], options[-1]["value"]] if len(options) > 1 else []
+    value = [options[-3]["value"], options[-2]["value"], options[-1]["value"]] if len(options) > 2 else []
 
     return options, value
 

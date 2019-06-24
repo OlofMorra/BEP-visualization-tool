@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app2.py" beforeDir="false" afterPath="$PROJECT_DIR$/app2.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -37,8 +37,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="310">
-              <caret line="503" column="42" lean-forward="true" selection-start-line="503" selection-start-column="42" selection-end-line="503" selection-end-column="42" />
+            <state relative-caret-position="743">
+              <caret line="421" lean-forward="true" selection-start-line="421" selection-end-line="421" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -49,7 +49,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/algorithms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="297">
+            <state relative-caret-position="915">
               <caret line="61" column="26" selection-start-line="61" selection-start-column="26" selection-end-line="61" selection-end-column="26" />
               <folding>
                 <element signature="e#235#254#0" expanded="true" />
@@ -61,8 +61,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="537" column="8" lean-forward="true" selection-start-line="537" selection-start-column="8" selection-end-line="538" selection-end-column="48" />
+            <state relative-caret-position="474">
+              <caret line="511" column="10" lean-forward="true" selection-start-line="511" selection-start-column="10" selection-end-line="511" selection-end-column="10" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -141,17 +141,15 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="61" />
-    <option name="y" value="60" />
-    <option name="width" value="1318" />
-    <option name="height" value="803" />
+    <option name="y" value="88" />
+    <option name="width" value="1747" />
+    <option name="height" value="992" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -168,6 +166,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -359,7 +358,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="145558000" />
+    <option name="totallyTimeSpent" value="160126000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -374,7 +373,7 @@
     <frame x="0" y="23" width="1440" height="877" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.108726755" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.11158799" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5007924" side_tool="true" weight="0.15884861" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -397,7 +396,7 @@
       <window_info anchor="right" id="Database" order="6" weight="0.32967034" />
       <window_info anchor="right" id="Version Control" order="7" side_tool="true" weight="0.32539684" />
       <window_info anchor="right" x="0" y="0" width="310" height="700" id="Documentation" order="8" side_tool="true" weight="0.3297568" />
-      <window_info active="true" anchor="right" id="Terminal" order="9" visible="true" weight="0.3576538" />
+      <window_info active="true" anchor="right" id="Terminal" order="9" visible="true" weight="0.3483548" />
     </layout>
     <layout-to-restore>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.108726755" />
@@ -523,7 +522,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/algorithms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
+        <state relative-caret-position="915">
           <caret line="61" column="26" selection-start-line="61" selection-start-column="26" selection-end-line="61" selection-end-column="26" />
           <folding>
             <element signature="e#235#254#0" expanded="true" />
@@ -533,8 +532,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="503" column="42" lean-forward="true" selection-start-line="503" selection-start-column="42" selection-end-line="503" selection-end-column="42" />
+        <state relative-caret-position="743">
+          <caret line="421" lean-forward="true" selection-start-line="421" selection-end-line="421" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>
@@ -543,8 +542,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="537" column="8" lean-forward="true" selection-start-line="537" selection-start-column="8" selection-end-line="538" selection-end-column="48" />
+        <state relative-caret-position="474">
+          <caret line="511" column="10" lean-forward="true" selection-start-line="511" selection-start-column="10" selection-end-line="511" selection-end-column="10" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>

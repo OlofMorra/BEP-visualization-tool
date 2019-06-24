@@ -379,7 +379,6 @@ def set_dijkstra_start_value(options):
         return None
 
 
-
 @app.callback(Output('dijkstra-weight-dropdown', 'options'),
               [Input('dijkstra-settings', 'style'),
                Input('dataset-dropdown', 'value')],
