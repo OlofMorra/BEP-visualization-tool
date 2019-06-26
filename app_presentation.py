@@ -40,11 +40,13 @@ app.scripts.config.serve_locally = True
 ####################
 algorithms = {
     'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
-    'Minimal spanning tree': ['Kruskal', 'Prim'],
+    'Minimal spanning tree': ['Prim', 'Kruskal'],
     'Matching': ['Ford-Fulkerson']
 }
 
 network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'random']
+
+DELTA_T = 0.5
 
 ###################
 # CREATING PANELS #
@@ -81,7 +83,7 @@ def create_input_panel():
         dcc.Dropdown(
             id="algorithm-type-dropdown",
             options=[{'label': x, 'value': x} for x in algorithms.keys()],
-            value=[x for x in algorithms.keys()][0]  # dumb workaround; dict.keys() doesn't support indexing
+            value=[x for x in algorithms.keys()][1]  # dumb workaround; dict.keys() doesn't support indexing
         ),
         html.P('Select algorithm to run'),
         dcc.Dropdown(id='algorithm-dropdown'),
@@ -119,7 +121,19 @@ def create_input_panel():
                 html.H3('Settings'), ]),
             # Prim
             html.Div(id='prim-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'), ]),
+                html.H3('Settings'),
+                html.P('Select start node'),
+                dcc.Dropdown(id='prim-start-dropdown'),
+                html.P('Edge weights:'),
+                dcc.RadioItems(
+                    id='prim-weight-radio',
+                    options=[{'label': 'Edge weights all equal to 1', 'value': 'no'},
+                             {'label': 'Use column in dataset as edge weights', 'value': 'yes'}],
+                    value='no',
+                    labelStyle={'display': 'inline-block'}
+                ),
+                dcc.Dropdown(id='prim-weight-dropdown', style={'display': 'none'}),
+                html.Button(id='prim-run-button', n_clicks=0, children='Run algorithm', type='submit')]),
             # Ford-Fulkerson
             html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[
                 html.H3('Settings'), ])
@@ -129,16 +143,31 @@ def create_input_panel():
 
 def create_visualisation_panel():
     return html.Div(className='visualisation-panel', children=[
+                # Dijkstra store components
                 dcc.Store(id='dijkstra-info', storage_type='memory'),
-                dcc.Store(id='graph-info', storage_type='memory'),
-                dcc.Store(id='data-info', storage_type='memory'),
-                dcc.Store(id='dynamic-graph-info', storage_type='memory'),
+                dcc.Store(id='dijkstra-graph-info', storage_type='memory'),
+                dcc.Store(id='dijkstra-data-info', storage_type='memory'),
+                dcc.Store(id='dijkstra-dynamic-graph-info', storage_type='memory'),
+                #Prim store components
+                dcc.Store(id='prim-info', storage_type='memory'),
+                dcc.Store(id='prim-graph-info', storage_type='memory'),
+                dcc.Store(id='prim-data-info', storage_type='memory'),
+                dcc.Store(id='prim-dynamic-graph-info', storage_type='memory'),
                 html.Div(className='vis-panel', children=[
                     html.H1('Visual analytics panel'),
                     dcc.Dropdown(id='show-graphs-dropdown', multi=True,
                                  style={'vertical-align': 'middle'}),
                     html.Div(id='shown-vis-graphs'),
-                    dcc.Store(id='selected-range', storage_type='memory')
+                    dcc.Store(id='selected-range', storage_type='memory'),
+                    dcc.Store(id='selected-range-1', storage_type='memory'),
+                    dcc.Store(id='selected-range-2', storage_type='memory'),
+                    dcc.Store(id='selected-range-3', storage_type='memory'),
+                    dcc.Store(id='selected-range-4', storage_type='memory'),
+                    dcc.Store(id='selected-range-5', storage_type='memory'),
+                    dcc.Store(id='selected-range-6', storage_type='memory'),
+                    dcc.Store(id='selected-range-7', storage_type='memory'),
+                    dcc.Store(id='selected-range-8', storage_type='memory'),
+                    dcc.Store(id='selected-range-9', storage_type='memory')
                 ])])
 
 
@@ -147,6 +176,8 @@ def create_output_panel():
             html.H1('Network animation'),
 
             # Algorithm animation
+            dcc.Store(id='dijkstra-stored-alg-output', storage_type='memory', data={}),
+            dcc.Store(id='prim-stored-alg-output', storage_type='memory', data={}),
             dcc.Store(id='stored-alg-output', storage_type='memory', data={}),
 
             dcc.Dropdown(id='algorithm-runs-dropdown'),
@@ -245,6 +276,15 @@ def createDiGraph(df, weight):
     return G1
 
 
+def createGraph(df, weight):
+    G1 = nx.Graph()
+    if weight in df.columns:
+        G1.add_weighted_edges_from(zip(df['source'], df['target'], df[weight]))
+    else:
+        G1.add_edges_from(zip(df['source'], df['target']))
+    return G1
+
+
 def append_new_time_series(current_graphs, length, name, id, data, xlab, ylab):
     if current_graphs is None:
         i = 1
@@ -264,9 +304,7 @@ def append_new_time_series(current_graphs, length, name, id, data, xlab, ylab):
                        'rangeslider': {'visible': True},
                        'tickmode': 'linear',
                        'dtick' : int(length/50)},
-                yaxis={'title': ylab},
-                clickmode='event+select',
-                dragmode='select'
+                yaxis={'title': ylab}
             )}
     )
 
@@ -296,9 +334,7 @@ def append_new_dynamic_graph(current_graphs, name, data, xlab):
                 hovermode='closest',
                 margin=dict(b=20, l=5, r=5, t=40),
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                clickmode='event+select',
-                dragmode='select')}
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))}
     )
 
     current_graphs.append(graph)
@@ -317,7 +353,7 @@ def extend_dynamic_graph(dynamic_graph, data):
             for node in iteration.keys():
                 if iteration[node] is not None:
                     edge_trace = go.Scatter(
-                        x=[l + (i*0.5), l + (i*0.5) + 1],
+                        x=[l + (i*DELTA_T), l + (i*DELTA_T) + 1],
                         y=[iteration[node], int(node)],
                         line=dict(width=0.5, color=('rgb(255,' + str(yellow) + ',0)')),
                         hoverinfo='none',
@@ -427,8 +463,8 @@ def set_algorithm_value(available_options):
 @app.callback([Output('dijkstra-settings', 'style'),
                Output('bellman-ford-settings', 'style'),
                Output('floyd-warshall-settings', 'style'),
-               Output('kruskal-settings', 'style'),
                Output('prim-settings', 'style'),
+               Output('kruskal-settings', 'style'),
                Output('ford-fulkerson-settings', 'style')],
               [Input('algorithm-dropdown', 'value')])
 def show_settings(selected_algorithm):
@@ -500,9 +536,70 @@ def set_dijkstra_weight_value(use_weight_column, options):
         return {'display': 'none'}, ''
 
 
+# Prim callbacks
+# TODO account for possible changes in Graph object
+@app.callback(Output('prim-start-dropdown', 'options'),
+              [Input('prim-settings', 'style'),
+               Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def set_prim_start_options(style, i, datasets):
+    if datasets is None or i is "":
+        raise PreventUpdate
+
+    if 'display' in style.keys() and style['display'] == 'none':
+        return []
+    else:
+        # TODO fix graph/dataset met callbacks
+        df = getDataFrame(datasets, i)
+        G1 = createDiGraph(df, "")
+        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
+
+
+@app.callback(Output('prim-start-dropdown', 'value'),
+              [Input('prim-start-dropdown', 'options')])
+def set_prim_start_value(options):
+    if len(options) > 0:
+        return options[0]['value']
+    else:
+        return None
+
+
+@app.callback(Output('prim-weight-dropdown', 'options'),
+              [Input('prim-settings', 'style'),
+               Input('dataset-dropdown', 'value')],
+              [State('datasets', 'data')])
+def set_prim_weight_options(style, i, datasets):
+    if datasets is None or i is "":
+        raise PreventUpdate
+
+    df = getDataFrame(datasets, i)
+
+    if 'display' in style.keys() and style['display'] == 'none':
+        return []
+    else:
+        # TODO fix graph/dataset met callbacks
+        return [{'label': x, 'value': x} for x in df.columns]
+
+
+@app.callback([Output('prim-weight-dropdown', 'style'),
+               Output('prim-weight-dropdown', 'value')],
+              [Input('prim-weight-radio', 'value')],
+              [State('prim-weight-dropdown', 'options')])
+def set_prim_weight_value(use_weight_column, options):
+    if use_weight_column == 'yes':
+        if len(options) > 0:
+            if 'weight' in [x['value'] for x in options]:
+                return {}, 'weight'
+            else:
+                return {}, options[0]['value']
+    else:
+        return {'display': 'none'}, ''
+
+
 ####################################
 # VISUAL ANALYTICS PANEL CALLBACKS #
 ####################################
+# Dijkstra callbacks
 @app.callback(Output('dijkstra-run-button', 'n_clicks'),
               [Input('dijkstra-info', 'data')])
 def end_dijkstra(data):
@@ -515,23 +612,24 @@ def end_dijkstra(data):
 
 
 @app.callback([Output('dijkstra-info', 'data'),
-               Output('data-info', 'data'),
-               Output('dynamic-graph-info', 'data'),
-               Output('stored-alg-output', 'data'),
-               Output('graph-info', 'data')],
+               Output('dijkstra-data-info', 'data'),
+               Output('dijkstra-dynamic-graph-info', 'data'),
+               Output('dijkstra-stored-alg-output', 'data'),
+               Output('dijkstra-graph-info', 'data')],
               [Input('dijkstra-run-button', 'n_clicks'),
-               Input('data-info', 'modified_timestamp')],
+               Input('dijkstra-data-info', 'modified_timestamp')],
               [State('datasets', 'data'),
                State('dijkstra-start-dropdown', 'value'),
                State('dijkstra-weight-dropdown', 'value'),
                State('dataset-dropdown', 'value'),
                State('dijkstra-weight-radio', 'value'),
                State('dijkstra-info', 'data'),
-               State('graph-info', 'data'),
-               State('dynamic-graph-info', 'data'),
-               State('stored-alg-output', 'data')])
+               State('dijkstra-graph-info', 'data'),
+               State('dijkstra-dynamic-graph-info', 'data'),
+               State('dijkstra-stored-alg-output', 'data'),
+               State('prim-stored-alg-output', 'data')])
 def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations,
-             dynamic_graph_data, data):
+             dynamic_graph_data, dijkstra_data, prim_data):
     if n_clicks > 0 and i not in ("", None):
         if n_clicks == 1:
             df = getDataFrame(datasets, i)
@@ -542,12 +640,15 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
 
             G = createDiGraph(df, weight)
 
-            if data is not None:
-                l = len(data)
+            if dijkstra_data is not None:
+                l = len(dijkstra_data)
             else:
                 l = 0
 
-            data["Dijkstra run {}".format(l+1)] = {'Run': l+1,
+            if prim_data is not None:
+                l = l + len(prim_data)
+
+            dijkstra_data["Dijkstra run {}".format(l+1)] = {'Run': l+1,
                                                 't_added': time.time(),
                                                 'dataset_number': i,
                                                 'start': start,
@@ -555,20 +656,20 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
                                                 'use_weight_column': use_weight_column,
                                                 'iterations': list()}
 
-            return init_dijkstra(G, start), [], [], data, []
+            return init_dijkstra(G, start), [], [], dijkstra_data, []
         else:
-            run = list(data.keys())[-1]
+            run = list(dijkstra_data.keys())[-1]
 
             Q, dist, prev, neighs = prev_data
             if iterations is None:
                 iterations = []
             output = iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data)
 
-            data[run]['iterations'].extend(output[2])
+            dijkstra_data[run]['iterations'].extend(output[2])
 
-            return output[0], data, output[3], data, output[1]
+            return output[0], dijkstra_data, output[3], dijkstra_data, output[1]
     else:
-        return [], [], dynamic_graph_data, data, iterations
+        return [], [], dynamic_graph_data, dijkstra_data, iterations
 
 
 def init_dijkstra(G, start):
@@ -634,16 +735,174 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data):
     return alg_output
 
 
+# Prim callbacks
+@app.callback(Output('prim-run-button', 'n_clicks'),
+              [Input('prim-info', 'data')])
+def end_prim(data):
+    if data in (None, []):
+        raise PreventUpdate
+    elif data[0][0][0] is None:
+        return 0
+    else:
+        return 2
+
+
+@app.callback([Output('prim-info', 'data'),
+               Output('prim-data-info', 'data'),
+               Output('prim-dynamic-graph-info', 'data'),
+               Output('prim-stored-alg-output', 'data'),
+               Output('prim-graph-info', 'data')],
+              [Input('prim-run-button', 'n_clicks'),
+               Input('prim-data-info', 'modified_timestamp')],
+              [State('datasets', 'data'),
+               State('prim-start-dropdown', 'value'),
+               State('prim-weight-dropdown', 'value'),
+               State('dataset-dropdown', 'value'),
+               State('prim-weight-radio', 'value'),
+               State('prim-info', 'data'),
+               State('prim-graph-info', 'data'),
+               State('prim-dynamic-graph-info', 'data'),
+               State('dijkstra-stored-alg-output', 'data'),
+               State('prim-stored-alg-output', 'data')])
+def prim(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations,
+             dynamic_graph_data, dijkstra_data, prim_data):
+    if n_clicks > 0 and i not in ("", None):
+        if n_clicks == 1:
+            df = getDataFrame(datasets, i)
+
+            if use_weight_column == 'no':
+                df['weight'] = 1  # list of ones
+                weight = 'weight'
+
+            G = createGraph(df, weight)
+
+            if dijkstra_data is not None:
+                l = len(dijkstra_data)
+            else:
+                l = 0
+
+            if prim_data is not None:
+                l = l + len(prim_data)
+
+            prim_data["Prim run {}".format(l+1)] = {'Run': l+1,
+                                                't_added': time.time(),
+                                                'dataset_number': i,
+                                                'start': start,
+                                                'weight': weight,
+                                                'use_weight_column': use_weight_column,
+                                                'iterations': list()}
+
+            return init_prim(G, start), [], [], prim_data, []
+        else:
+            run = list(prim_data.keys())[-1]
+
+            Q, dist, prev, neighs, MST = prev_data
+            if iterations is None:
+                iterations = []
+            output = iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data)
+
+            prim_data[run]['iterations'].extend(output[2])
+
+            return output[0], prim_data, output[3], prim_data, output[1]
+    else:
+        return [], [], dynamic_graph_data, prim_data, iterations
+
+
+def init_prim(G, start):
+    Q = list()
+    dist = dict()
+    prev = dict()
+    neighs = dict()
+    MST = list()
+
+    dist[start] = 0
+    for v in G.nodes:
+        neighs[v] = []
+        for x in nx.neighbors(G, v):
+            neighs[v].append([x, G.edges[v, x]['weight']])
+        if v != start:
+            dist[v] = float('inf')
+        prev[v] = None
+        heappush(Q, (dist[v], v))  # insert v, maintaining min heap property
+
+    alg_output = [Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs), MST]
+
+    return alg_output
+
+
+def iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data):
+    dynamic_graph_data = []
+    iter_data = list()
+    for i in range(0, 30):
+        if Q not in (None, []) and Q[0][0] != float("inf"):
+            t_start = time.time()  # keep track of time
+            for q in Q:
+                if q[0] is None:
+                    q[0] = float("inf")
+
+            dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property
+
+            if u not in MST:
+                MST.append(u)
+                neighs_u = neighs[str(u)]
+                for neighbor in neighs_u:
+                    if neighbor[0] not in MST:
+                        dist[str(neighbor[0])] = neighbor[1]
+                        heappush(Q, [int(neighbor[1]), neighbor[0]])
+                    else:
+                        if prev[str(u)] is None:
+                            prev[str(u)] = neighbor[0]
+                        elif neighbor[1] < dist[str(prev[str(u)])]:
+                            prev[str(u)] = neighbor[0]
+
+                    t_elapsed = (time.time() - t_start)*1000
+                    timestamp = datetime.datetime.now()
+                    memory_used = get_memory_used(Q, dist, prev, neighs_u, MST)
+
+                iterations.append([len(iterations), t_elapsed, memory_used])
+                iter_data.append({'t': t_elapsed,
+                        'memory': memory_used,
+                        'Q': Q,
+                        'u': u,
+                        'v': neighs_u[0][0],
+                        'neighs_u': column(neighs_u,0),
+                        'dist': dist.copy(),
+                        'prev': prev.copy()})
+
+            dynamic_graph_data.append(prev.copy())
+
+    alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs), MST], iterations,
+                  iter_data, dynamic_graph_data]
+
+    return alg_output
+
+
+# Add graph based on saved data
 @app.callback(Output('saved-vis-graphs', 'children'),
-              [Input('graph-info', 'modified_timestamp')],
+              [Input('dijkstra-graph-info', 'modified_timestamp'),
+               Input('prim-graph-info', 'modified_timestamp')],
               [State('saved-vis-graphs', 'children'),
-               State('graph-info', 'data'),
-               State('dynamic-graph-info', 'data')])
-def add_dijkstra_graphs(t, current_graphs, graph_data, dynamic_graph_data):
+               State('dijkstra-graph-info', 'data'),
+               State('dijkstra-dynamic-graph-info', 'data'),
+               State('prim-graph-info', 'data'),
+               State('prim-dynamic-graph-info', 'data')])
+def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
+                        dijkstra_dynamic_graph_data, prim_graph_data, prim_dynamic_graph_data):
+    if dash.callback_context.triggered[0]['prop_id'][:8] == 'dijkstra':
+        graph_data = dijkstra_graph_data
+        dynamic_graph_data = dijkstra_dynamic_graph_data
+        name = "Dijkstra"
+    elif dash.callback_context.triggered[0]['prop_id'][:4] == 'prim':
+        graph_data = prim_graph_data
+        dynamic_graph_data = prim_dynamic_graph_data
+        name = "Prim"
+    else:
+        raise PreventUpdate
+
     if graph_data is not None:
         if graph_data == []:
             current_graphs = append_new_dynamic_graph(current_graphs,
-                                                      name='Alg: Dijkstra | Data: {} | Type: Dynamic Graph | Run:'.format(1),
+                                                      name='Alg: ' + name + ' | Data: {} | Type: Dynamic Graph | Run:'.format(1),
                                                       data=[],
                                                       xlab='iteration number')
             current_graphs = append_new_time_series(current_graphs, 1, name='1', id='time', data=[], xlab='', ylab='')
@@ -664,7 +923,7 @@ def add_dijkstra_graphs(t, current_graphs, graph_data, dynamic_graph_data):
             current_graphs = append_new_time_series(
                 current_graphs,
                 length,
-                name='Alg: Dijkstra | Data: {} | Type: Runtime | Run:'.format(1),
+                name='Alg: ' + name + ' | Data: {} | Type: Runtime | Run:'.format(1),
                 id='time',
                 data=[time_trace],
                 xlab='iteration number',
@@ -674,7 +933,7 @@ def add_dijkstra_graphs(t, current_graphs, graph_data, dynamic_graph_data):
             current_graphs = append_new_time_series(
                 current_graphs,
                 length,
-                name='Alg: Dijkstra | Data: {} | Type: Memory | Run:'.format(1),
+                name='Alg: ' + name + ' | Data: {} | Type: Memory | Run:'.format(1),
                 id='memory',
                 data=[memory_trace],
                 xlab='iteration number',
@@ -683,17 +942,17 @@ def add_dijkstra_graphs(t, current_graphs, graph_data, dynamic_graph_data):
 
         return current_graphs
     else:
-        raise PreventUpdate
+        return []
 
 
+
+# Visualisation callbacks
 @app.callback([Output('show-graphs-dropdown', 'options'),
                Output('show-graphs-dropdown', 'value')],
               [Input('saved-vis-graphs', 'children')])
-def set_show_visualizations_dropdown_options(current_dijkstra_graphs):
-    current_graphs = []
-
-    if current_dijkstra_graphs is not None:
-        current_graphs.extend(current_dijkstra_graphs)
+def set_show_visualizations_dropdown_options(current_graphs):
+    if current_graphs is None:
+        current_graphs =[]
 
     options = [{'label': graph['props']['figure']['layout']['title']['text'], 'value': graph['props']['id']} for graph in current_graphs]
     value = [options[-3]["value"], options[-2]["value"], options[-1]["value"]] if len(options) > 2 else []
@@ -704,34 +963,87 @@ def set_show_visualizations_dropdown_options(current_dijkstra_graphs):
 @app.callback(Output('shown-vis-graphs', 'children'),
               [Input('show-graphs-dropdown', 'value')],
               [State('saved-vis-graphs', 'children')])
-def hide_visualizations(selected_graph_ids, saved_dijkstra_graphs):
+def hide_visualizations(selected_graph_ids, saved_graphs):
     result = []
-    saved_graphs = []
 
-    if saved_dijkstra_graphs is not None:
-        saved_graphs.extend(saved_dijkstra_graphs)
+    if saved_graphs is None:
+        saved_graphs = []
 
     for graph in saved_graphs:
         if graph['props']['id'] in selected_graph_ids:
             result.append(graph.copy())
     return result
 
+for i in range(1,10):
+    @app.callback(Output('selected-range-{}'.format(i), 'data'),
+                  [Input('dynamic-graph-{}'.format(i), 'relayoutData'),
+                   Input('memory-graph-{}'.format(i), 'relayoutData'),
+                   Input('time-graph-{}'.format(i), 'relayoutData')])
+    def update_range(dynamic_graph_range, memory_graph_range, time_graph_range):
+        trigger_comp = dash.callback_context.triggered[0]['prop_id'][:-15]
+        range = []
+
+        if trigger_comp == "dynamic-graph":
+            if len(dynamic_graph_range) > 2:
+                x1 = dynamic_graph_range["xaxis.range[0]"]/DELTA_T
+                x2 = dynamic_graph_range["xaxis.range[1]"]/DELTA_T + 1
+                range = [x1, x2]
+        elif trigger_comp == "time-graph":
+            if len(time_graph_range) != 1:
+                range = [time_graph_range["xaxis.range[0]"], time_graph_range["xaxis.range[1]"]]
+        elif trigger_comp == "memory-graph":
+            if len(memory_graph_range) != 1:
+                range = [memory_graph_range["xaxis.range[0]"], memory_graph_range["xaxis.range[1]"]]
+
+        return range
+
 
 @app.callback(Output('selected-range', 'data'),
-              [Input('dynamic-graph-1', 'relayoutData'),
-               Input('memory-graph-1', 'relayoutData'),
-               Input('time-graph-1', 'relayoutData')])
-def update_range(selection0, selection1, selection2):
-    print(selection0)
-    print(selection1)
-    print(selection2)
-    return []
+              [Input("selected-range-1", 'modified_timestamp'),
+               Input("selected-range-2", 'modified_timestamp'),
+               Input("selected-range-3", 'modified_timestamp'),
+               Input("selected-range-4", 'modified_timestamp'),
+               Input("selected-range-5", 'modified_timestamp'),
+               Input("selected-range-6", 'modified_timestamp'),
+               Input("selected-range-7", 'modified_timestamp'),
+               Input("selected-range-8", 'modified_timestamp'),
+               Input("selected-range-9", 'modified_timestamp')],
+              [State("selected-range-1", 'data'),
+               State("selected-range-2", 'data'),
+               State("selected-range-3", 'data'),
+               State("selected-range-4", 'data'),
+               State("selected-range-5", 'data'),
+               State("selected-range-6", 'data'),
+               State("selected-range-7", 'data'),
+               State("selected-range-8", 'data'),
+               State("selected-range-9", 'data')])
+def set_range_of_iter_slider(*args):
+    trigger_comp = int(dash.callback_context.triggered[0]['prop_id'][-20])
+    iter_range = []
 
+    if args[8 + trigger_comp] is None:
+        raise PreventUpdate
+
+    if args[8+trigger_comp] != []:
+        x1 = int(args[8+trigger_comp][0])
+        x2 = int(args[8 + trigger_comp][1]) + 1
+        iter_range = [x1, x2]
+
+    return iter_range
 
 
 ##########################
 # OUTPUT PANEL CALLBACKS #
 ##########################
+@app.callback(Output('stored-alg-output', 'data'),
+              [Input('dijkstra-stored-alg-output', 'modified_timestamp'),
+               Input('prim-stored-alg-output', 'modified_timestamp')],
+              [State('dijkstra-stored-alg-output', 'data'),
+               State('prim-stored-alg-output', 'data')])
+def combine_store_components(t1, t2, dijkstra, prim):
+    return {**dijkstra, **prim}
+
+
 @app.callback([Output('network', 'style'),
                Output('network-graph', 'children')],
               [Input('draw-network-radio', 'value'),
@@ -775,7 +1087,12 @@ def set_algorithm_runs_dropdown_value(options):
     if options is None or len(options) == 0:
         raise PreventUpdate
     else:
-        return options[0]['value']
+        i = 0
+        for run in options:
+            if int(run['value'][-1]) > i:
+                i = int(run['value'][-1])
+                last = run
+        return last['value']
 
 
 @app.callback(Output('cytoscape-network-animation', 'layout'),
@@ -853,9 +1170,12 @@ def set_iteration_range_min_max_marks(run_name, run_data):
                Input('animation-stop-button', 'n_clicks'),
                Input('animation-run-button', 'n_clicks'),
                Input('animation-reset-button', 'n_clicks'),
-               Input('animation-interval', 'n_intervals')],
-              [State('iteration-range-slider', 'value')])
-def set_iteration_range_slider_value(slider_min, slider_max, stop_clicks, run_clicks, reset_clicks, n_intervals, cur_iter_range):
+               Input('animation-interval', 'n_intervals'),
+               Input('selected-range', 'modified_timestamp')],
+              [State('iteration-range-slider', 'value'),
+               State('selected-range', 'data')])
+def set_iteration_range_slider_value(slider_min, slider_max, stop_clicks, run_clicks,
+                                     reset_clicks, n_intervals, t, cur_iter_range, sel_range):
     if None in [trigger['value'] for trigger in dash.callback_context.triggered]:
         raise PreventUpdate
 
@@ -877,6 +1197,17 @@ def set_iteration_range_slider_value(slider_min, slider_max, stop_clicks, run_cl
             return cur_iter_range, True
     elif 'animation-reset-button.n_clicks' in triggers:
         return [slider_min, slider_min + 1, slider_max], True  # first mark is not part of the animation
+    elif 'selected-range.modified_timestamp' in triggers:
+        if slider_min is None:
+            raise PreventUpdate
+        elif sel_range == []:
+            return [slider_min, slider_min + 1, slider_max], True
+        else:
+            if sel_range[0] < slider_min:
+                sel_range[0] = slider_min
+            if sel_range[1] >= slider_max:
+                sel_range[1] = slider_max
+            return [sel_range[0], sel_range[0], sel_range[1]], True
 
 
 @app.callback(Output('iteration-range-slider', 'marks'),
@@ -924,6 +1255,7 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
     i = int(iteration_range[1])  # iteration_range = (min, value, max)
     iteration = run_data[run_name]['iterations'][i]  # iteration data: dictionary containing Q, u, neighs_u, dist, prev
     df = getDataFrame(datasets, run_data[run_name]['dataset_number'])
+    edges_visited = []
 
     weight = run_data[run_name]['weight']
 
@@ -935,9 +1267,12 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
     nodes_visited = [str(node) for node, dist in iteration["dist"].items() if dist != 'inf']
     nodes_unvisited = [str(node) for node, dist in iteration["dist"].items() if dist == 'inf']
     # assumption only one entry of edge (x,y) in a dataset
-    edges_visited = [{'id': "{}-{}".format(int(src), int(tg)),
-                      'weight': df[(df['source'] == int(src)) & (df['target'] == int(tg))][weight].iloc[0]
-                      } for tg, src in iteration['prev'].items() if src is not None]
+    try:
+        edges_visited = [{'id': "{}-{}".format(int(src), int(tg)),
+                          'weight': df[(df['source'] == int(src)) & (df['target'] == int(tg))][weight].iloc[0]
+                          } for tg, src in iteration['prev'].items() if src is not None]
+    except Exception as e:
+        print(e)
     edges_unvisited = ["{}-{}".format(src, tg) for tg, src in iteration['prev'].items() if src is None]
 
     stylesheet = []
@@ -1005,7 +1340,7 @@ app.layout = html.Div(id='main-body', children=[
     create_output_panel(),
 
     # HIDDEN DIVS
-    html.Div(id='saved-vis-graphs', style={'display': 'none'}),
+    html.Div(id='saved-vis-graphs', style={'display': 'none'})
 ])
 
 if __name__ == '__main__':
