@@ -29,7 +29,8 @@ import networkx as nx
 app = dash.Dash(__name__)
 
 app.config['suppress_callback_exceptions'] = True
-app.scripts.config.serve_locally = True
+app.scripts.config.serve_locally = False
+app.css.append_css({'external_url': 'https://use.fontawesome.com/releases/v5.7.0/css/all.css'})
 
 ####################
 # GLOBAL VARIABLES #
@@ -48,13 +49,15 @@ network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'rand
 
 DELTA_T = 0.5
 
+GRAPH_TYPES = ['Dynamic', 'Memory', 'Time']
+
 ###################
 # CREATING PANELS #
 ###################
 
 
 def create_input_panel():
-    return html.Div(className='input-panel', children=[
+    return html.Div(id='input-panel', className='input-panel', children=[
         # Data uploading and saving
         html.H1('Input panel'),
         html.Div('Supported file types are csv, json, '
@@ -72,8 +75,17 @@ def create_input_panel():
                     type="default"),
         dcc.Store(id='datasets', storage_type='memory'),
 
-        # Algorithm selection
         html.Hr(),
+
+        # Graph selection
+        html.P('Select graph types'),
+        dcc.Checklist(
+            id='graph-type-selection',
+            options=[{'label': x, 'value': x} for x in GRAPH_TYPES],
+            value=GRAPH_TYPES
+        ),
+
+        # Algorithm selection
         html.H1('Algorithm settings'),
         html.P('Select dataset'),
         dcc.Dropdown(id='dataset-dropdown',
@@ -142,7 +154,7 @@ def create_input_panel():
 
 
 def create_visualisation_panel():
-    return html.Div(className='visualisation-panel', children=[
+    return html.Div(className='visualization-panel', children=[
                 # Dijkstra store components
                 dcc.Store(id='dijkstra-info', storage_type='memory'),
                 dcc.Store(id='dijkstra-graph-info', storage_type='memory'),
@@ -173,49 +185,56 @@ def create_visualisation_panel():
 
 def create_output_panel():
     return html.Div(className='output-panel', children=[
-            html.H1('Network animation'),
+                html.H1('Network information'),
+                html.Div(id='network-statistics-dijkstra'),
+                html.Div(id='network-statistics-prim'),
+                html.P('Draw network graph:'),
+                dcc.RadioItems(id='draw-network-radio',
+                               options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
+                               value='no'),
+                html.Div(id='network', style={'display': 'none'}, children=[
+                    html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
+                    dcc.Dropdown(id='network-layout-dropdown',
+                                 options=[{'label': x, 'value': x} for x in network_layouts],
+                                 value=network_layouts[0],
+                                 style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+                    html.Div(id='network-graph')]),
 
-            # Algorithm animation
-            dcc.Store(id='dijkstra-stored-alg-output', storage_type='memory', data={}),
-            dcc.Store(id='prim-stored-alg-output', storage_type='memory', data={}),
-            dcc.Store(id='stored-alg-output', storage_type='memory', data={}),
+                html.H1('Network animation'),
 
-            dcc.Dropdown(id='algorithm-runs-dropdown'),
-            html.Div([
-                html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
-                dcc.Dropdown(id='animation-network-layout-dropdown',
-                             options=[{'label': x, 'value': x} for x in network_layouts],
-                             value=network_layouts[0],
-                             style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'})]),
-            html.Div(id='network-animation'),
-            html.Div(id='iteration-range-slider-block', children=[
-                dcc.RangeSlider(id='iteration-range-slider', pushable=1),
-            ], style={'height': '40px'}),
-            html.Div(id='animation-buttons', children=[
-                html.Button(id='animation-run-button', n_clicks=0, children='Run animation', type='submit'),
-                html.Button(id='animation-stop-button', n_clicks=0, children='Pause animation', type='submit'),
-                html.Button(id='animation-reset-button', n_clicks=0, children='Reset slider', type='submit'),
-            ]),
-            html.Div(id='interval-block', children=[
-                html.P('Animation speed:', style={'display': 'inline-block'}),
-                dcc.Input(id='interval-length-input', type='number', value=1, min=1, max=99, style={'width': '33px'}),
-                html.P('seconds', style={'display': 'inline-block'}),
-            ]),
-            dcc.Interval(id='animation-interval', interval=1000, disabled=True),
+                # Algorithm animation
+                dcc.Store(id='dijkstra-stored-alg-output', storage_type='memory', data={}),
+                dcc.Store(id='prim-stored-alg-output', storage_type='memory', data={}),
+                dcc.Store(id='stored-alg-output', storage_type='memory', data={}),
 
-            html.Div(id='show-div-content'),
-            html.P('Draw network graph:'),
-            dcc.RadioItems(id='draw-network-radio',
-                           options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
-                           value='no'),
-            html.Div(id='network', style={'display': 'none'}, children=[
-                html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
-                dcc.Dropdown(id='network-layout-dropdown',
-                             options=[{'label': x, 'value': x} for x in network_layouts],
-                             value=network_layouts[0],
-                             style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'}),
-                html.Div(id='network-graph')]),
-        ])
+                dcc.Dropdown(id='algorithm-runs-dropdown'),
+                html.Div([
+                    html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
+                    dcc.Dropdown(id='animation-network-layout-dropdown',
+                                 options=[{'label': x, 'value': x} for x in network_layouts],
+                                 value=network_layouts[0],
+                                 style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'})]),
+                html.Div(id='network-animation'),
+                html.Div(id='iteration-range-slider-block', children=[
+                    dcc.RangeSlider(id='iteration-range-slider', pushable=1),
+                ], style={'height': '40px'}),
+                html.Div(id='animation-buttons', children=[
+                    html.Button(id='animation-run-button', n_clicks=0, children='Run animation', type='submit',
+                                style={'cursor': 'pointer'}),
+                    html.Button(id='animation-stop-button', n_clicks=0, children='Pause animation', type='submit',
+                                style={'cursor': 'pointer'}),
+                    html.Button(id='animation-reset-button', n_clicks=0, children='Reset slider', type='submit',
+                                style={'cursor': 'pointer'}),
+                ]),
+                html.Div(id='interval-block', children=[
+                    html.P('Animation speed:', style={'display': 'inline-block'}),
+                    dcc.Input(id='interval-length-input', type='number', value=1, min=1, max=99, style={'width': '33px'}),
+                    html.P('seconds', style={'display': 'inline-block'}),
+                ]),
+                dcc.Interval(id='animation-interval', interval=1000, disabled=True),
+
+                html.Div(id='show-div-content')
+            ])
 
 
 #############
@@ -285,17 +304,11 @@ def createGraph(df, weight):
     return G1
 
 
-def append_new_time_series(current_graphs, length, name, id, data, xlab, ylab):
-    if current_graphs is None:
-        i = 1
-        current_graphs = []
-    else:
-        i = int((len(current_graphs) + 2)/3)
-
-    name = name + str(i)  # id number corresponding to index in the list of graphs
+def append_new_time_series(current_graphs, length, name, id, data, xlab, ylab, run):
+    name = name + str(run)  # id number corresponding to index in the list of graphs
 
     graph = dcc.Graph(
-        id=id + '-graph-{}'.format(i),
+        id=id + '-graph-{}'.format(run),
         figure={
             'data': data,
             'layout': go.Layout(
@@ -312,19 +325,13 @@ def append_new_time_series(current_graphs, length, name, id, data, xlab, ylab):
     return current_graphs
 
 
-def append_new_dynamic_graph(current_graphs, name, data, xlab):
-    if current_graphs is None:
-        i = 1
-        current_graphs = []
-    else:
-        i = int((len(current_graphs) + 3)/3)
-
-    name = name + str(i)  # id number corresponding to index in the list of graphs
+def append_new_dynamic_graph(current_graphs, name, data, xlab, run):
+    name = name + str(run)  # id number corresponding to index in the list of graphs
 
     length = len(data)
 
     graph = dcc.Graph(
-        id="dynamic-graph-{}".format(i),
+        id="dynamic-graph-{}".format(run),
         figure={
             'data': [],
             'layout': go.Layout(
@@ -353,7 +360,7 @@ def extend_dynamic_graph(dynamic_graph, data):
             for node in iteration.keys():
                 if iteration[node] is not None:
                     edge_trace = go.Scatter(
-                        x=[l + (i*DELTA_T), l + (i*DELTA_T) + 1],
+                        x=[l - 1 + (i*DELTA_T), l + (i*DELTA_T)],
                         y=[iteration[node], int(node)],
                         line=dict(width=0.5, color=('rgb(255,' + str(yellow) + ',0)')),
                         hoverinfo='none',
@@ -394,9 +401,21 @@ def get_memory_used(*args):
 def column(matrix, i):
     return [row[i] for row in matrix]
 
+
 #########################
 # INPUT PANEL CALLBACKS #
 #########################
+@app.callback([Output('input-panel', 'style'),
+               Output('hide-input-panel-button', 'className'),
+               Output('content', 'className')],
+              [Input('hide-input-panel-button', 'n_clicks')])
+def hide_input_panel(n_clicks):
+    if n_clicks % 2 != 0:
+        return {'display': 'none'}, 'fas fa-chevron-right', 'content_hidden'
+    else:
+        return {}, 'fas fa-chevron-left', 'content'
+
+
 # Callback functions; functions that execute when something is changed
 @app.callback([Output('upload-message', 'children'),
                Output('datasets', 'data'),
@@ -477,7 +496,8 @@ def show_settings(selected_algorithm):
 
 # Dijkstra callbacks
 # TODO account for possible changes in Graph object
-@app.callback(Output('dijkstra-start-dropdown', 'options'),
+@app.callback([Output('dijkstra-start-dropdown', 'options'),
+               Output('network-statistics-dijkstra', 'children')],
               [Input('dijkstra-settings', 'style'),
                Input('dataset-dropdown', 'value')],
               [State('datasets', 'data')])
@@ -486,20 +506,25 @@ def set_dijkstra_start_options(style, i, datasets):
         raise PreventUpdate
 
     if 'display' in style.keys() and style['display'] == 'none':
-        return []
+        return [], []
     elif i is None:
-        return []
+        return [], html.Div('No dataset is uploaded.')
     else:
         df = getDataFrame(datasets, i)
         G1 = createDiGraph(df, "")
-        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
+        info = html.Div([html.P('Number of nodes: ' + str(G1.number_of_nodes())),
+                      html.P('Number of edges: ' + str(G1.number_of_edges()))])
+        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)], info
 
 
 @app.callback(Output('dijkstra-start-dropdown', 'value'),
               [Input('dijkstra-start-dropdown', 'options')])
 def set_dijkstra_start_value(options):
-    if len(options) > 0:
-        return options[0]['value']
+    if options is not None:
+        if len(options) > 0:
+            return options[0]['value']
+        else:
+            return None
     else:
         return None
 
@@ -538,7 +563,8 @@ def set_dijkstra_weight_value(use_weight_column, options):
 
 # Prim callbacks
 # TODO account for possible changes in Graph object
-@app.callback(Output('prim-start-dropdown', 'options'),
+@app.callback([Output('prim-start-dropdown', 'options'),
+               Output('network-statistics-prim', 'children')],
               [Input('prim-settings', 'style'),
                Input('dataset-dropdown', 'value')],
               [State('datasets', 'data')])
@@ -547,21 +573,28 @@ def set_prim_start_options(style, i, datasets):
         raise PreventUpdate
 
     if 'display' in style.keys() and style['display'] == 'none':
-        return []
+        return [], []
+    elif i is None:
+        return [], html.Div('No dataset is uploaded.')
     else:
         # TODO fix graph/dataset met callbacks
         df = getDataFrame(datasets, i)
         G1 = createDiGraph(df, "")
-        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)]
+        info = html.Div([html.P('Number of nodes: ' + str(G1.number_of_nodes())),
+                      html.P('Number of edges: ' + str(G1.number_of_edges()))])
+        return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)], info
 
 
 @app.callback(Output('prim-start-dropdown', 'value'),
               [Input('prim-start-dropdown', 'options')])
 def set_prim_start_value(options):
-    if len(options) > 0:
-        return options[0]['value']
+    if options is not None:
+        if len(options) > 0:
+            return options[0]['value']
+        else:
+            return None
     else:
-        return None
+        raise PreventUpdate
 
 
 @app.callback(Output('prim-weight-dropdown', 'options'),
@@ -569,7 +602,7 @@ def set_prim_start_value(options):
                Input('dataset-dropdown', 'value')],
               [State('datasets', 'data')])
 def set_prim_weight_options(style, i, datasets):
-    if datasets is None or i is "":
+    if datasets is None or i in ("", None):
         raise PreventUpdate
 
     df = getDataFrame(datasets, i)
@@ -852,7 +885,8 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data):
                     else:
                         if prev[str(u)] is None:
                             prev[str(u)] = neighbor[0]
-                        elif neighbor[1] < dist[str(prev[str(u)])]:
+                            dist[str(u)] = neighbor[1]
+                        elif int(neighbor[1]) < int(dist[str(u)]):
                             prev[str(u)] = neighbor[0]
 
                     t_elapsed = (time.time() - t_start)*1000
@@ -862,14 +896,14 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data):
                 iterations.append([len(iterations), t_elapsed, memory_used])
                 iter_data.append({'t': t_elapsed,
                         'memory': memory_used,
-                        'Q': Q,
+                        'Q': Q.copy(),
                         'u': u,
                         'v': neighs_u[0][0],
                         'neighs_u': column(neighs_u,0),
                         'dist': dist.copy(),
                         'prev': prev.copy()})
 
-            dynamic_graph_data.append(prev.copy())
+                dynamic_graph_data.append(prev.copy())
 
     alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs), MST], iterations,
                   iter_data, dynamic_graph_data]
@@ -885,9 +919,11 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data):
                State('dijkstra-graph-info', 'data'),
                State('dijkstra-dynamic-graph-info', 'data'),
                State('prim-graph-info', 'data'),
-               State('prim-dynamic-graph-info', 'data')])
+               State('prim-dynamic-graph-info', 'data'),
+               State('graph-type-selection', 'value')])
 def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
-                        dijkstra_dynamic_graph_data, prim_graph_data, prim_dynamic_graph_data):
+                        dijkstra_dynamic_graph_data, prim_graph_data,
+                        prim_dynamic_graph_data, graph_types):
     if dash.callback_context.triggered[0]['prop_id'][:8] == 'dijkstra':
         graph_data = dijkstra_graph_data
         dynamic_graph_data = dijkstra_dynamic_graph_data
@@ -900,62 +936,87 @@ def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
         raise PreventUpdate
 
     if graph_data is not None:
-        if graph_data == []:
-            current_graphs = append_new_dynamic_graph(current_graphs,
-                                                      name='Alg: ' + name + ' | Data: {} | Type: Dynamic Graph | Run:'.format(1),
+        if not graph_data:
+            if current_graphs is None:
+                current_graphs = []
+                run = 1
+            else:
+                run = int(current_graphs[-1]['props']['id'][-1]) + 1
+
+            if 'Dynamic' in graph_types:
+                current_graphs = append_new_dynamic_graph(current_graphs,
+                                                      name='Alg: ' + name + ' | Data: {} | Type: Dynamic Graph | Run: '.format(1),
                                                       data=[],
-                                                      xlab='iteration number')
-            current_graphs = append_new_time_series(current_graphs, 1, name='1', id='time', data=[], xlab='', ylab='')
-            current_graphs = append_new_time_series(current_graphs, 1, name='2', id='memory', data=[], xlab='', ylab='')
+                                                      xlab='iteration number',
+                                                      run=run)
+            if 'Time' in graph_types:
+                current_graphs = append_new_time_series(current_graphs, 1, name='1', id='time', data=[], xlab='', ylab='', run=run)
+            if 'Memory' in graph_types:
+                current_graphs = append_new_time_series(current_graphs, 1, name='2', id='memory', data=[], xlab='', ylab='', run=run)
         else:
-            current_graphs = current_graphs[:-2]
+            run = int(current_graphs[-1]['props']['id'][-1])
+            if 'Memory' in graph_types and 'Time' in graph_types:
+                current_graphs = current_graphs[:-2]
+            elif 'Memory' or 'Time' in graph_types:
+                current_graphs = current_graphs[:-1]
 
-            current_graphs[-1] = extend_dynamic_graph(
-                current_graphs[-1],
-                data=dynamic_graph_data
-            )
-
-            time_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 1))
-            memory_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 2))
+            if 'Dynamic' in graph_types:
+                current_graphs[-1] = extend_dynamic_graph(
+                    current_graphs[-1],
+                    data=dynamic_graph_data
+                )
 
             length = len(graph_data)
 
-            current_graphs = append_new_time_series(
-                current_graphs,
-                length,
-                name='Alg: ' + name + ' | Data: {} | Type: Runtime | Run:'.format(1),
-                id='time',
-                data=[time_trace],
-                xlab='iteration number',
-                ylab='time (ms)'
-            )
+            if 'Time' in graph_types:
+                time_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 1))
+                current_graphs = append_new_time_series(
+                    current_graphs,
+                    length,
+                    name='Alg: ' + name + ' | Data: {} | Type: Runtime | Run: '.format(1),
+                    id='time',
+                    data=[time_trace],
+                    xlab='iteration number',
+                    ylab='time (ms)',
+                    run=run
+                )
 
-            current_graphs = append_new_time_series(
-                current_graphs,
-                length,
-                name='Alg: ' + name + ' | Data: {} | Type: Memory | Run:'.format(1),
-                id='memory',
-                data=[memory_trace],
-                xlab='iteration number',
-                ylab='Memory (MB)'
-            )
+            if 'Memory' in graph_types:
+                memory_trace = go.Scatter(x=column(graph_data, 0), y=column(graph_data, 2))
+                current_graphs = append_new_time_series(
+                    current_graphs,
+                    length,
+                    name='Alg: ' + name + ' | Data: {} | Type: Memory | Run: '.format(1),
+                    id='memory',
+                    data=[memory_trace],
+                    xlab='iteration number',
+                    ylab='Memory (MB)',
+                    run=run
+                )
 
         return current_graphs
     else:
-        return []
-
+        raise PreventUpdate
 
 
 # Visualisation callbacks
 @app.callback([Output('show-graphs-dropdown', 'options'),
                Output('show-graphs-dropdown', 'value')],
-              [Input('saved-vis-graphs', 'children')])
-def set_show_visualizations_dropdown_options(current_graphs):
+              [Input('saved-vis-graphs', 'children')],
+              [State('graph-type-selection', 'value')])
+def set_show_visualizations_dropdown_options(current_graphs, graph_types):
     if current_graphs is None:
-        current_graphs =[]
+        current_graphs = []
 
     options = [{'label': graph['props']['figure']['layout']['title']['text'], 'value': graph['props']['id']} for graph in current_graphs]
-    value = [options[-3]["value"], options[-2]["value"], options[-1]["value"]] if len(options) > 2 else []
+    value = []
+
+    if len(graph_types) == 3:
+        value = [options[-3]["value"], options[-2]["value"], options[-1]["value"]]
+    elif len(graph_types) == 2:
+        value = [options[-2]["value"], options[-1]["value"]]
+    elif len(graph_types) == 1:
+        value = [options[-1]["value"]]
 
     return options, value
 
@@ -974,6 +1035,7 @@ def hide_visualizations(selected_graph_ids, saved_graphs):
             result.append(graph.copy())
     return result
 
+
 for i in range(1,10):
     @app.callback(Output('selected-range-{}'.format(i), 'data'),
                   [Input('dynamic-graph-{}'.format(i), 'relayoutData'),
@@ -981,21 +1043,27 @@ for i in range(1,10):
                    Input('time-graph-{}'.format(i), 'relayoutData')])
     def update_range(dynamic_graph_range, memory_graph_range, time_graph_range):
         trigger_comp = dash.callback_context.triggered[0]['prop_id'][:-15]
-        range = []
+        slide_range = []
 
         if trigger_comp == "dynamic-graph":
-            if len(dynamic_graph_range) > 2:
+            if dynamic_graph_range is None:
+                raise PreventUpdate
+            elif len(dynamic_graph_range) > 2:
                 x1 = dynamic_graph_range["xaxis.range[0]"]/DELTA_T
-                x2 = dynamic_graph_range["xaxis.range[1]"]/DELTA_T + 1
-                range = [x1, x2]
+                x2 = dynamic_graph_range["xaxis.range[1]"]/DELTA_T
+                slide_range = [x1, x2]
         elif trigger_comp == "time-graph":
-            if len(time_graph_range) != 1:
-                range = [time_graph_range["xaxis.range[0]"], time_graph_range["xaxis.range[1]"]]
+            if time_graph_range is None:
+                raise PreventUpdate
+            elif len(time_graph_range) != 1:
+                slide_range = [time_graph_range["xaxis.range[0]"], time_graph_range["xaxis.range[1]"]]
         elif trigger_comp == "memory-graph":
-            if len(memory_graph_range) != 1:
-                range = [memory_graph_range["xaxis.range[0]"], memory_graph_range["xaxis.range[1]"]]
+            if memory_graph_range is None:
+                raise PreventUpdate
+            elif len(memory_graph_range) != 1:
+                slide_range = [memory_graph_range["xaxis.range[0]"], memory_graph_range["xaxis.range[1]"]]
 
-        return range
+        return slide_range
 
 
 @app.callback(Output('selected-range', 'data'),
@@ -1024,7 +1092,7 @@ def set_range_of_iter_slider(*args):
     if args[8 + trigger_comp] is None:
         raise PreventUpdate
 
-    if args[8+trigger_comp] != []:
+    if args[8 + trigger_comp] != []:
         x1 = int(args[8+trigger_comp][0])
         x2 = int(args[8 + trigger_comp][1]) + 1
         iter_range = [x1, x2]
@@ -1207,7 +1275,9 @@ def set_iteration_range_slider_value(slider_min, slider_max, stop_clicks, run_cl
                 sel_range[0] = slider_min
             if sel_range[1] >= slider_max:
                 sel_range[1] = slider_max
-            return [sel_range[0], sel_range[0], sel_range[1]], True
+            if sel_range[0] == sel_range[1]:
+                sel_range[0] = sel_range[1] - 1
+            return [sel_range[0], sel_range[0] + 1, sel_range[1]], True
 
 
 @app.callback(Output('iteration-range-slider', 'marks'),
@@ -1253,6 +1323,10 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
     COL_CONSIDERING = '#DC7633'
 
     i = int(iteration_range[1])  # iteration_range = (min, value, max)
+
+    if i >= len(run_data[run_name]['iterations']):
+        raise PreventUpdate
+
     iteration = run_data[run_name]['iterations'][i]  # iteration data: dictionary containing Q, u, neighs_u, dist, prev
     df = getDataFrame(datasets, run_data[run_name]['dataset_number'])
     edges_visited = []
@@ -1329,19 +1403,30 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
 ##############
 # APP LAYOUT #
 ##############
-app.layout = html.Div(id='main-body', children=[
-    # INPUT PANEL
-    create_input_panel(),
+app.layout = html.Div(className='main', children=[
+    # Header
+    html.Div(className='header', children=[
+        html.I(id='hide-input-panel-button', n_clicks=0,
+               style={'font-size': '24px', 'align': 'bottom', 'cursor': 'pointer'}),
+        html.H1("Title bar"),
+    ]),
 
-    # VISUAL ANALYTICS PANEL
-    create_visualisation_panel(),
+    # Content
+    html.Div(className='content', id='content', children=[
+        # INPUT PANEL
+        create_input_panel(),
 
-    # OUTPUT PANEL
-    create_output_panel(),
+        # VISUAL ANALYTICS PANEL
+        create_visualisation_panel(),
 
-    # HIDDEN DIVS
-    html.Div(id='saved-vis-graphs', style={'display': 'none'})
+        # OUTPUT PANEL
+        create_output_panel(),
+
+        # # HIDDEN DIVS
+        html.Div(id='saved-vis-graphs', style={'display': 'none'})
+    ])
 ])
+
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=7000)  # Might want to switch to processes=4

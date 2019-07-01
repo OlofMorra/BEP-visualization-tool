@@ -1,13 +1,51 @@
-#main-body {
+:root {
+    --main-bg-color: #D0ECE7;
+    --main-txt-color: black;
+    --main-padding: 15px;
+    --header-bg-color: orange;
+    --header-txt-color: yellow;
+    --input-bg-color: #A2D9CE;
+    --input-txt-color: ;
+
+}
+
+body {
+    margin: 0px;
+    background-color: var(--main-bg-color);
+    font-family: "Montserrat";
+    /*background-color: var(--header-bg-color) !important;*/
+    /*color: var(--header-txt-color) !important;*/
+}
+
+.main {}
+
+.header {
     display: grid;
-    grid-template-columns: 250px auto 450px;
+    grid-template-columns: 30px auto;
+    text-align: center;
+    /*align: middle;*/
+    background-color: var(--header-bg-color);
+    color: var(--header-txt-color);
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 250px auto 30%;
+    grid-column-gap: 10px;
+    grid-template-rows: 50px;
+    grid-row-gap: 10px;
+}
+
+.content_hidden {
+    display: grid;
+    grid-template-columns: 49% 49%;
     grid-column-gap: 10px;
     grid-template-rows: 50px;
     grid-row-gap: 10px;
 }
 
 .input-panel {
-    background-color: #f9a800;
+    background-color: var(--input-bg-color);
     grid-row-end: span 12;
     padding: 8px;
 }
@@ -16,7 +54,7 @@
     grid-row-start: 1;
     grid-row-end: 3;
     text-align: center;
-    font-family: "Palatino", "Georgia", "Verdana", "Helvetica";
+    font-family: "Helvetica";
     font-size: 22px;
 }
 
@@ -30,4 +68,16 @@
     text-align: center;
     margin: 10px;
     cursor: pointer;
+}
+
+.visualization-panel {
+    background-color: var(--input-bg-color);
+    grid-row-end: span 3;
+    padding: 8px;
+}
+
+.output-panel {
+    background-color: var(--input-bg-color);
+    grid-row-end: span 5;
+    padding: 8px;
 }
