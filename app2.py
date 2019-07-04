@@ -517,8 +517,6 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
 
             data['iterations'] = output[1]
 
-            print(data)
-
             return output[0], output[1], data, output[3]
     else:
         return [], iterations, [], dynamic_graph_data
@@ -547,7 +545,7 @@ def init_dijkstra(G, start):
 
 def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data):
     dynamic_graph_data = []
-    for i in range(0, 1):
+    for i in range(0, 30):
         data = dict()
         if Q not in (None, []) and Q[0][0] != float("inf"):
             t_start = time.time()  # keep track of time

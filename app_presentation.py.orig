@@ -30,7 +30,6 @@ app = dash.Dash(__name__)
 
 app.config['suppress_callback_exceptions'] = True
 app.scripts.config.serve_locally = True
-app.css.config.serve_locally = False
 app.css.append_css({'external_url': 'https://use.fontawesome.com/releases/v5.7.0/css/all.css'})
 
 ####################
@@ -48,7 +47,7 @@ algorithms = {
 
 network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'random']
 
-DELTA_T = 0.2
+DELTA_T = 0.5
 
 GRAPH_TYPES = ['Dynamic', 'Memory', 'Time']
 
@@ -86,18 +85,6 @@ def create_input_panel():
             options=[{'label': x, 'value': x} for x in GRAPH_TYPES],
             value=GRAPH_TYPES
         ),
-
-        html.Div(id='interval-graph-block', children=[
-            html.P('Update speed:', style={'padding-right': '5px', 'display': 'inline-block'}),
-            dcc.Input(id='graph-update-speed', type='number', value=10, min=1, style={'width': '33px'}),
-            html.P('iterations', style={'padding-left': '5px', 'display': 'inline-block'}),
-        ]),
-
-        html.Div(id='interval-lines-block', children=[
-            html.P('Show all lines per:', style={'padding-right': '5px', 'display': 'inline-block'}),
-            dcc.Input(id='line-update-speed', type='number', value=0, min=0, style={'width': '33px'}),
-            html.P('iterations', style={'padding-left': '5px', 'display': 'inline-block'}),
-        ]),
 
         # Algorithm selection
         html.H1('Algorithm settings'),
@@ -249,7 +236,18 @@ def create_output_panel():
                 ]),
                 dcc.Interval(id='animation-interval', interval=1000, disabled=True),
 
-            html.Div(id='show-div-content')
+            html.Div(id='show-div-content'),
+            html.P('Draw network graph:'),
+            dcc.RadioItems(id='draw-network-radio',
+                           options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
+                           value='no'),
+            html.Div(id='network', style={'display': 'none'}, children=[
+                html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
+                dcc.Dropdown(id='network-layout-dropdown',
+                             options=[{'label': x, 'value': x} for x in network_layouts],
+                             value=network_layouts[0],
+                             style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+                html.Div(id='network-graph')]),
             ])
 
 
@@ -341,8 +339,10 @@ def append_new_time_series(current_graphs, length, name, id, data, xlab, ylab, r
     return current_graphs
 
 
-def append_new_dynamic_graph(current_graphs, name, run):
+def append_new_dynamic_graph(current_graphs, name, data, xlab, run):
     name = name + str(run)  # id number corresponding to index in the list of graphs
+
+    length = len(data)
 
     graph = dcc.Graph(
         id="dynamic-graph-{}".format(run),
@@ -353,63 +353,33 @@ def append_new_dynamic_graph(current_graphs, name, run):
                 titlefont=dict(size=16),
                 showlegend=False,
                 hovermode='closest',
-                margin=dict(b=20, l=40, r=5, t=40),
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False,
-                           rangeslider=dict(visible=True)),
-                yaxis=dict(showgrid=False, zeroline=False, title='Nodes',
-                           showticklabels=False))}
+                margin=dict(b=20, l=5, r=5, t=40),
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))}
     )
 
     current_graphs.append(graph)
     return current_graphs
 
 
-def extend_dynamic_graph(dynamic_graph, data, lines):
+def extend_dynamic_graph(dynamic_graph, data):
     if len(data) > 0:
         if dynamic_graph['props']['figure']['data'] != []:
             l = dynamic_graph['props']['figure']['data'][-1]['x'][0]
         else:
             l = 0
 
-        prev_iter = data[0]
-
         for i, iteration in enumerate(data, 1):
-            if iteration == prev_iter and i % lines != 0:
-                continue
             for node in iteration.keys():
-                opacity = 0.2
                 if iteration[node] is not None:
-                    if iteration[node] != prev_iter[node]:
-                        if prev_iter[node] is None:
-                            marker_color = 'red'
-                        else:
-                            marker_color = ['blue', 'yellow']
-
-                        change_marker = go.Scatter(
-                            x=[l + (i*DELTA_T), l + (i*DELTA_T)],
-                            y=[prev_iter[node], iteration[node]],
-                            hoverinfo='text',
-                            text='Change in iteration: ' + str(int(l/DELTA_T+i)),
-                            mode='markers',
-                            marker=dict(
-                                size=10,
-                                color=marker_color
-                            )
-                        )
-                        dynamic_graph['props']['figure']['data'].append(change_marker)
-                        opacity = 1
-                    if opacity == 1 or i % lines == 0:
-                        color = get_color(int(iteration[node]))
-                        edge_trace = go.Scatter(
-                            x=[l + (i*DELTA_T), l + (i*DELTA_T) + 1],
-                            y=[iteration[node], int(node)],
-                            line=dict(width=3, color=color),
-                            hoverinfo='text',
-                            text='[' + str(iteration[node]) + ',' + str(node) + ']',
-                            mode='lines',
-                            opacity=opacity)
-                        dynamic_graph['props']['figure']['data'].append(edge_trace)
-            prev_iter = iteration
+                    color = get_color(int(iteration[node]))
+                    edge_trace = go.Scatter(
+                        x=[l - 1 + (i*DELTA_T), l + (i*DELTA_T)],
+                        y=[iteration[node], int(node)],
+                        line=dict(width=2, color=color, opacity=0.5),
+                        hoverinfo='none',
+                        mode='lines')
+                    dynamic_graph['props']['figure']['data'].append(edge_trace)
 
     return dynamic_graph
 
@@ -418,7 +388,6 @@ def get_color(node):
     red = ((int(node)%5) * 50) % 255
     green = ((int(node)%7) * 35) % 255
     blue = ((int(node)%11) * 22) % 255
-
     return 'rgb(' + str(red) + ', ' + str(green) + ', ' + str(blue) + ')'
 
 
@@ -710,18 +679,11 @@ def end_dijkstra(data):
                State('dijkstra-weight-radio', 'value'),
                State('dijkstra-info', 'data'),
                State('dijkstra-graph-info', 'data'),
+               State('dijkstra-dynamic-graph-info', 'data'),
                State('dijkstra-stored-alg-output', 'data'),
-               State('prim-stored-alg-output', 'data'),
-               State('graph-type-selection', 'value'),
-               State('graph-update-speed', 'value'),
-               State('dijkstra-dynamic-graph-info', 'data')])
+               State('prim-stored-alg-output', 'data')])
 def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations,
-             dijkstra_data, prim_data, graph_types, update_speed, dynamic_graph_info):
-    if 'Dynamic' in graph_types:
-        dynamic = True
-    else:
-        dynamic = False
-
+             dynamic_graph_data, dijkstra_data, prim_data):
     if n_clicks > 0 and i not in ("", None):
         if n_clicks == 1:
             df = getDataFrame(datasets, i)
@@ -747,28 +709,21 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
                                                 'weight': weight,
                                                 'use_weight_column': use_weight_column,
                                                 'iterations': list()}
-            alg_output = init_dijkstra(G, start)
 
-            return alg_output, [], [alg_output[2]], dijkstra_data, []
+            return init_dijkstra(G, start), [], [], dijkstra_data, []
         else:
             run = list(dijkstra_data.keys())[-1]
 
             Q, dist, prev, neighs = prev_data
             if iterations is None:
                 iterations = []
-
-            output = iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic, update_speed)
+            output = iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data)
 
             dijkstra_data[run]['iterations'].extend(output[2])
 
-            if len(dynamic_graph_info) == 1:
-                dynamic_graph_info.extend(output[3])
-            else:
-                dynamic_graph_info = output[3]
-
-            return output[0], dijkstra_data, dynamic_graph_info, dijkstra_data, output[1]
+            return output[0], dijkstra_data, output[3], dijkstra_data, output[1]
     else:
-        return [], [], dynamic_graph_info, dijkstra_data, iterations
+        return [], [], dynamic_graph_data, dijkstra_data, iterations
 
 
 def init_dijkstra(G, start):
@@ -792,10 +747,10 @@ def init_dijkstra(G, start):
     return alg_output
 
 
-def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic, i):
+def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic_graph_data):
     dynamic_graph_data = []
     iter_data = list()
-    for i in range(0, i):
+    for i in range(0, 30):
         if Q not in (None, []) and Q[0][0] != float("inf"):
             t_start = time.time()  # keep track of time
             for q in Q:
@@ -826,11 +781,7 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic, i):
                         'dist': dist.copy(),
                         'prev': prev.copy()})
 
-                if dynamic:
-                    dynamic_graph_data.append(prev.copy())
-
-        else:
-            break
+            dynamic_graph_data.append(prev.copy())
 
     alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs)], iterations,
                   iter_data, dynamic_graph_data]
@@ -864,12 +815,11 @@ def end_prim(data):
                State('prim-weight-radio', 'value'),
                State('prim-info', 'data'),
                State('prim-graph-info', 'data'),
+               State('prim-dynamic-graph-info', 'data'),
                State('dijkstra-stored-alg-output', 'data'),
-               State('prim-stored-alg-output', 'data'),
-               State('graph-update-speed', 'value'),
-               State('prim-dynamic-graph-info', 'data')])
+               State('prim-stored-alg-output', 'data')])
 def prim(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, prev_data, iterations,
-            dijkstra_data, prim_data, update_speed, dynamic_graph_info):
+             dynamic_graph_data, dijkstra_data, prim_data):
     if n_clicks > 0 and i not in ("", None):
         if n_clicks == 1:
             df = getDataFrame(datasets, i)
@@ -903,14 +853,13 @@ def prim(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, pr
             Q, dist, prev, neighs, MST = prev_data
             if iterations is None:
                 iterations = []
-
-            output = iter_prim(Q, dist, prev, neighs, MST, iterations, update_speed)
+            output = iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data)
 
             prim_data[run]['iterations'].extend(output[2])
 
             return output[0], prim_data, output[3], prim_data, output[1]
     else:
-        return [], [], dynamic_graph_info, prim_data, iterations
+        return [], [], dynamic_graph_data, prim_data, iterations
 
 
 def init_prim(G, start):
@@ -935,10 +884,10 @@ def init_prim(G, start):
     return alg_output
 
 
-def iter_prim(Q, dist, prev, neighs, MST, iterations, i):
-    dynamic_graph_data =[]
+def iter_prim(Q, dist, prev, neighs, MST, iterations, dynamic_graph_data):
+    dynamic_graph_data = []
     iter_data = list()
-    for i in range(0, i):
+    for i in range(0, 30):
         if Q not in (None, []) and Q[0][0] != float("inf"):
             t_start = time.time()  # keep track of time
             for q in Q:
@@ -965,17 +914,17 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, i):
                     timestamp = datetime.datetime.now()
                     memory_used = get_memory_used(Q, dist, prev, neighs_u, MST)
 
-                    iterations.append([len(iterations), t_elapsed, memory_used])
-                    iter_data.append({'t': t_elapsed,
-                            'memory': memory_used,
-                            'Q': Q,
-                            'u': u,
-                            'v': neighs_u[0][0],
-                            'neighs_u': column(neighs_u,0),
-                            'dist': dist.copy(),
-                            'prev': prev.copy()})
+                iterations.append([len(iterations), t_elapsed, memory_used])
+                iter_data.append({'t': t_elapsed,
+                        'memory': memory_used,
+                        'Q': Q.copy(),
+                        'u': u,
+                        'v': neighs_u[0][0],
+                        'neighs_u': column(neighs_u,0),
+                        'dist': dist.copy(),
+                        'prev': prev.copy()})
 
-                    dynamic_graph_data.append(prev.copy())
+                dynamic_graph_data.append(prev.copy())
 
     alg_output = [[Q, clean_dict(dist), clean_dict(prev), clean_dict(neighs), MST], iterations,
                   iter_data, dynamic_graph_data]
@@ -992,13 +941,10 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, i):
                State('dijkstra-dynamic-graph-info', 'data'),
                State('prim-graph-info', 'data'),
                State('prim-dynamic-graph-info', 'data'),
-               State('graph-type-selection', 'value'),
-               State('line-update-speed', 'value')])
+               State('graph-type-selection', 'value')])
 def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
                         dijkstra_dynamic_graph_data, prim_graph_data,
-                        prim_dynamic_graph_data, graph_types, lines):
-    if lines == 0:
-        lines = float('inf')
+                        prim_dynamic_graph_data, graph_types):
     if dash.callback_context.triggered[0]['prop_id'][:8] == 'dijkstra':
         graph_data = dijkstra_graph_data
         dynamic_graph_data = dijkstra_dynamic_graph_data
@@ -1021,35 +967,24 @@ def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
             if 'Dynamic' in graph_types:
                 current_graphs = append_new_dynamic_graph(current_graphs,
                                                       name='Alg: ' + name + ' | Data: {} | Type: Dynamic Graph | Run: '.format(1),
+                                                      data=[],
+                                                      xlab='iteration number',
                                                       run=run)
             if 'Time' in graph_types:
-                current_graphs = append_new_time_series(current_graphs, 1,
-                                                        name='Alg: ' + name + ' | Data: {} | Type: Time | Run: '.format(1),
-                                                        id='time',
-                                                        data=[],
-                                                        xlab='iteration number',
-                                                        ylab='Time (ms)',
-                                                        run=run)
+                current_graphs = append_new_time_series(current_graphs, 1, name='1', id='time', data=[], xlab='', ylab='', run=run)
             if 'Memory' in graph_types:
-                current_graphs = append_new_time_series(current_graphs, 1,
-                                                        name='Alg: ' + name + ' | Data: {} | Type: Memory | Run: '.format(1),
-                                                        id='memory',
-                                                        data=[],
-                                                        xlab='iteration number',
-                                                        ylab='Memory (mb)',
-                                                        run=run)
+                current_graphs = append_new_time_series(current_graphs, 1, name='2', id='memory', data=[], xlab='', ylab='', run=run)
         else:
             run = int(current_graphs[-1]['props']['id'][-1])
             if 'Memory' in graph_types and 'Time' in graph_types:
                 current_graphs = current_graphs[:-2]
-            elif 'Memory' in graph_types or 'Time' in graph_types:
+            elif 'Memory' or 'Time' in graph_types:
                 current_graphs = current_graphs[:-1]
 
             if 'Dynamic' in graph_types:
                 current_graphs[-1] = extend_dynamic_graph(
                     current_graphs[-1],
-                    data=dynamic_graph_data,
-                    lines=lines
+                    data=dynamic_graph_data
                 )
 
             length = len(graph_data)
@@ -1063,7 +998,7 @@ def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
                     id='time',
                     data=[time_trace],
                     xlab='iteration number',
-                    ylab='Time (ms)',
+                    ylab='time (ms)',
                     run=run
                 )
 
@@ -1134,9 +1069,9 @@ for i in range(1,10):
         if trigger_comp == "dynamic-graph":
             if dynamic_graph_range is None:
                 raise PreventUpdate
-            elif len(dynamic_graph_range) != 1:
-                x1 = (dynamic_graph_range["xaxis.range[0]"])/DELTA_T
-                x2 = (dynamic_graph_range["xaxis.range[1]"])/DELTA_T
+            elif len(dynamic_graph_range) > 2:
+                x1 = dynamic_graph_range["xaxis.range[0]"]/DELTA_T
+                x2 = dynamic_graph_range["xaxis.range[1]"]/DELTA_T
                 slide_range = [x1, x2]
         elif trigger_comp == "time-graph":
             if time_graph_range is None:
