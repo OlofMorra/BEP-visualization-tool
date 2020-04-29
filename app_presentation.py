@@ -6,7 +6,6 @@ import dash_cytoscape as cyto
 from dash.dependencies import Input, Output, State
 import dash_table
 from dash.exceptions import PreventUpdate
-import plotly.plotly as py
 import plotly.graph_objs as go
 
 import pandas as pd
@@ -41,66 +40,57 @@ app.css.append_css({'external_url': 'https://use.fontawesome.com/releases/v5.7.0
 # of cell          #
 ####################
 algorithms = {
-    'Shortest path': ['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'],
-    'Minimal spanning tree': ['Prim', 'Kruskal'],
-    'Matching': ['Ford-Fulkerson']
+    'Shortest path': ['Dijkstra'],  # 'Bellman-Ford', 'Floyd-Warshall'
+    'Minimal spanning tree': ['Prim']  # 'Kruskal'
+    # 'Matching': ['Ford-Fulkerson']
 }
 
 network_layouts = ['breadthfirst', 'circle', 'concentric', 'cose', 'grid', 'random']
 
-DELTA_T = 0.2
+DELTA_T = 0.02
+MARKER_SIZE = 14
+LINE_WIDTH = 2
+MAX_OPACITY = 0.9
 
 GRAPH_TYPES = ['Dynamic', 'Memory', 'Time']
 
 ###################
 # CREATING PANELS #
 ###################
-
+def create_header():
+    return html.Div(id='header', className='header', children=[
+        html.Abbr(children=[html.I(id='hide-input-panel-button', n_clicks=0,
+                                   style={'font-size': '24px', 'cursor': 'pointer'})],
+                  title='Hide input panel', id='hide-input-panel-msg'),
+        html.H1("Visualization of Graph Network Algorithms")
+    ])
 
 def create_input_panel():
     return html.Div(id='input-panel', className='input-panel', children=[
         # Data uploading and saving
-        html.H1('Input panel'),
-        html.Div('Supported file types are csv, json, '
-                 'xls, dta, xpt and pkl.'),
+        html.H2('Upload Dataset'),
+        # html.Div('Supported file types are csv, json, '
+        #          'xls, dta, xpt and pkl.'),
 
         dcc.Loading(id="loading-data",
-                    children=[dcc.Upload(
-                        id='upload-field',
-                        className='upload-data',
-                        children=[html.Div(['Drag and Drop or ',
-                                    html.A('Select Files')])],
-                        # Do allow multiple files to be uploaded
-                        multiple=True
-                    ), html.Div(id='upload-message')],
+                    children=[
+                        html.Abbr(dcc.Upload(
+                            id='upload-field',
+                            className='upload-data',
+                            children=[html.Div(['Drag and Drop or ',
+                                                html.A('Select Files')])],
+                            # Do allow multiple files to be uploaded
+                            multiple=True
+                        ), title='Supported file types are csv, json, xls, dta, xpt and pkl.'),
+                        html.Div(id='upload-message')],
                     type="default"),
         dcc.Store(id='datasets', storage_type='memory'),
 
         # Algorithm selection
         html.Hr(),
 
-        # Graph selection
-        html.P('Select graph types'),
-        dcc.Checklist(
-            id='graph-type-selection',
-            options=[{'label': x, 'value': x} for x in GRAPH_TYPES],
-            value=GRAPH_TYPES
-        ),
-
-        html.Div(id='interval-graph-block', children=[
-            html.P('Update speed:', style={'padding-right': '5px', 'display': 'inline-block'}),
-            dcc.Input(id='graph-update-speed', type='number', value=10, min=1, style={'width': '33px'}),
-            html.P('iterations', style={'padding-left': '5px', 'display': 'inline-block'}),
-        ]),
-
-        html.Div(id='interval-lines-block', children=[
-            html.P('Show all lines per:', style={'padding-right': '5px', 'display': 'inline-block'}),
-            dcc.Input(id='line-update-speed', type='number', value=0, min=0, style={'width': '33px'}),
-            html.P('iterations', style={'padding-left': '5px', 'display': 'inline-block'}),
-        ]),
-
         # Algorithm selection
-        html.H1('Algorithm settings'),
+        html.H2('Settings'),
         html.P('Select dataset'),
         dcc.Dropdown(id='dataset-dropdown',
                      options=[],
@@ -121,7 +111,7 @@ def create_input_panel():
                 message='Please select a value for all settings'),
             # Dijkstra
             html.Div(id='dijkstra-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),
+                html.H2('Parameters'),
                 html.P('Select start node'),
                 dcc.Dropdown(id='dijkstra-start-dropdown'),
                 html.P('Edge weights:'),
@@ -138,17 +128,19 @@ def create_input_panel():
             ]),
             # Bellman-Ford
             html.Div(id='bellman-ford-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),
+                html.H2('Parameters')
             ]),
             # Floyd Warshall
             html.Div(id='floyd-warshall-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'), ]),
+                html.H2('Parameters')
+            ]),
             # Kruskal
             html.Div(id='kruskal-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'), ]),
+                html.H2('Parameters')
+            ]),
             # Prim
             html.Div(id='prim-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'),
+                html.H2('Parameters'),
                 html.P('Select start node'),
                 dcc.Dropdown(id='prim-start-dropdown'),
                 html.P('Edge weights:'),
@@ -164,93 +156,133 @@ def create_input_panel():
                             style={'cursor': 'pointer'})]),
             # Ford-Fulkerson
             html.Div(id='ford-fulkerson-settings', style={'display': 'none'}, children=[
-                html.H3('Settings'), ])
+                html.H2('Parameters')
+            ]),
+        ]),
+
+        # Graph selection
+        html.P('Select graph types'),
+        dcc.Checklist(
+            id='graph-type-selection',
+            options=[{'label': x, 'value': x} for x in GRAPH_TYPES],
+            value=GRAPH_TYPES
+        ),
+
+        html.Div(id='interval-graph-block', children=[
+            html.P('Update speed:', style={'padding-right': '5px', 'display': 'inline-block'}),
+            dcc.Input(id='graph-update-speed', type='number', value=10, min=1, style={'width': '33px'}),
+            html.P('iterations', style={'padding-left': '5px', 'display': 'inline-block'}),
+        ]),
+
+        html.Div(id='interval-lines-block', children=[
+            html.P('Show all lines per:', style={'padding-right': '5px', 'display': 'inline-block'}),
+            dcc.Input(id='line-update-speed', type='number', value=0, min=0, style={'width': '33px'}),
+            html.P('iterations', style={'padding-left': '5px', 'display': 'inline-block'}),
         ]),
     ])
 
 
 def create_visualisation_panel():
     return html.Div(className='visualization-panel', children=[
-                # Dijkstra store components
-                dcc.Store(id='dijkstra-info', storage_type='memory'),
-                dcc.Store(id='dijkstra-graph-info', storage_type='memory'),
-                dcc.Store(id='dijkstra-data-info', storage_type='memory'),
-                dcc.Store(id='dijkstra-dynamic-graph-info', storage_type='memory'),
-                #Prim store components
-                dcc.Store(id='prim-info', storage_type='memory'),
-                dcc.Store(id='prim-graph-info', storage_type='memory'),
-                dcc.Store(id='prim-data-info', storage_type='memory'),
-                dcc.Store(id='prim-dynamic-graph-info', storage_type='memory'),
-                html.Div(className='vis-panel', children=[
-                    html.H1('Visual analytics panel'),
-                    dcc.Dropdown(id='show-graphs-dropdown', multi=True,
-                                 style={'vertical-align': 'middle'}),
-                    html.Div(id='shown-vis-graphs'),
-                    dcc.Store(id='selected-range', storage_type='memory'),
-                    dcc.Store(id='selected-range-1', storage_type='memory'),
-                    dcc.Store(id='selected-range-2', storage_type='memory'),
-                    dcc.Store(id='selected-range-3', storage_type='memory'),
-                    dcc.Store(id='selected-range-4', storage_type='memory'),
-                    dcc.Store(id='selected-range-5', storage_type='memory'),
-                    dcc.Store(id='selected-range-6', storage_type='memory'),
-                    dcc.Store(id='selected-range-7', storage_type='memory'),
-                    dcc.Store(id='selected-range-8', storage_type='memory'),
-                    dcc.Store(id='selected-range-9', storage_type='memory')
-                ])])
+        # Dijkstra store components
+        dcc.Store(id='dijkstra-info', storage_type='memory'),
+        dcc.Store(id='dijkstra-graph-info', storage_type='memory'),
+        dcc.Store(id='dijkstra-data-info', storage_type='memory'),
+        dcc.Store(id='dijkstra-dynamic-graph-info', storage_type='memory'),
+        #Prim store components
+        dcc.Store(id='prim-info', storage_type='memory'),
+        dcc.Store(id='prim-graph-info', storage_type='memory'),
+        dcc.Store(id='prim-data-info', storage_type='memory'),
+        dcc.Store(id='prim-dynamic-graph-info', storage_type='memory'),
+        html.Div(className='vis-panel', children=[
+            html.H2('Visual Analytics'),
+            dcc.Dropdown(id='show-graphs-dropdown', multi=True,
+                         style={'vertical-align': 'middle'}),
+            html.Div(id='shown-vis-graphs'),
+            dcc.Store(id='selected-range', storage_type='memory'),
+            dcc.Store(id='selected-range-1', storage_type='memory'),
+            dcc.Store(id='selected-range-2', storage_type='memory'),
+            dcc.Store(id='selected-range-3', storage_type='memory'),
+            dcc.Store(id='selected-range-4', storage_type='memory'),
+            dcc.Store(id='selected-range-5', storage_type='memory'),
+            dcc.Store(id='selected-range-6', storage_type='memory'),
+            dcc.Store(id='selected-range-7', storage_type='memory'),
+            dcc.Store(id='selected-range-8', storage_type='memory'),
+            dcc.Store(id='selected-range-9', storage_type='memory')
+        ])])
 
 
 def create_output_panel():
     return html.Div(className='output-panel', children=[
-                html.H1('Network information'),
-                html.Div(id='network-statistics-dijkstra'),
-                html.Div(id='network-statistics-prim'),
-                html.P('Draw network graph:'),
-                dcc.RadioItems(id='draw-network-radio',
-                               options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
-                               value='no'),
-                html.Div(id='network', style={'display': 'none'}, children=[
-                    html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
-                    dcc.Dropdown(id='network-layout-dropdown',
-                                 options=[{'label': x, 'value': x} for x in network_layouts],
-                                 value=network_layouts[0],
-                                 style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'}),
-                    html.Div(id='network-graph')]),
+        html.H2('Network Animation'),
+        # Algorithm animation
+        dcc.Store(id='dijkstra-stored-alg-output', storage_type='memory', data={}),
+        dcc.Store(id='prim-stored-alg-output', storage_type='memory', data={}),
+        dcc.Store(id='stored-alg-output', storage_type='memory', data={}),
 
-                html.H1('Network animation'),
+        dcc.Dropdown(id='algorithm-runs-dropdown'),
 
-                # Algorithm animation
-                dcc.Store(id='dijkstra-stored-alg-output', storage_type='memory', data={}),
-                dcc.Store(id='prim-stored-alg-output', storage_type='memory', data={}),
-                dcc.Store(id='stored-alg-output', storage_type='memory', data={}),
+        html.Div([
+            html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
+            dcc.Dropdown(id='animation-network-layout-dropdown',
+                         options=[{'label': x, 'value': x} for x in network_layouts],
+                         value=network_layouts[0],
+                         style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'})]),
+        html.Div(id='network-animation'),
+        html.Div(id='iteration-range-slider-block', children=[
+            dcc.RangeSlider(id='iteration-range-slider', pushable=1),
+        ], style={'height': '40px', 'margin': '10px'}),
+        html.Div(id='animation-buttons', children=[
+            html.Button(id='animation-run-button', n_clicks=0, children='Run animation', type='submit',
+                        style={'cursor': 'pointer'}),
+            html.Button(id='animation-stop-button', n_clicks=0, children='Pause animation', type='submit',
+                        style={'cursor': 'pointer'}),
+            html.Button(id='animation-reset-button', n_clicks=0, children='Reset slider', type='submit',
+                        style={'cursor': 'pointer'}),
+        ]),
+        html.Div(id='interval-block', children=[
+            html.P('Animation speed:', style={'display': 'inline-block'}),
+            dcc.Input(id='interval-length-input', type='number', value=1, min=1, max=99, style={'width': '33px'}),
+            html.P('seconds', style={'display': 'inline-block'}),
+        ]),
+        html.Div(id='output-container-range-slider'),
+        dcc.Interval(id='animation-interval', interval=1000, disabled=True),
 
-                dcc.Dropdown(id='algorithm-runs-dropdown'),
-                html.Div([
-                    html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
-                    dcc.Dropdown(id='animation-network-layout-dropdown',
-                                 options=[{'label': x, 'value': x} for x in network_layouts],
-                                 value=network_layouts[0],
-                                 style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'})]),
-                html.Div(id='network-animation'),
-                html.Div(id='iteration-range-slider-block', children=[
-                    dcc.RangeSlider(id='iteration-range-slider', pushable=1),
-                ], style={'height': '40px'}),
-                html.Div(id='animation-buttons', children=[
-                    html.Button(id='animation-run-button', n_clicks=0, children='Run animation', type='submit',
-                                style={'cursor': 'pointer'}),
-                    html.Button(id='animation-stop-button', n_clicks=0, children='Pause animation', type='submit',
-                                style={'cursor': 'pointer'}),
-                    html.Button(id='animation-reset-button', n_clicks=0, children='Reset slider', type='submit',
-                                style={'cursor': 'pointer'}),
-                ]),
-                html.Div(id='interval-block', children=[
-                    html.P('Animation speed:', style={'display': 'inline-block'}),
-                    dcc.Input(id='interval-length-input', type='number', value=1, min=1, max=99, style={'width': '33px'}),
-                    html.P('seconds', style={'display': 'inline-block'}),
-                ]),
-                dcc.Interval(id='animation-interval', interval=1000, disabled=True),
+        html.Div(id='animation-legend', children=[
+            html.Hr(),
+            html.I(id='hide-legend-button', n_clicks=0,
+                   style={'font-size': '16px', 'cursor': 'pointer', 'display': 'inline-block', 'padding': '5px'}),
+            html.H3("Legend  ", style={'display': 'inline-block'}),
+            html.Div(className='animation-legend', id='animation-legend-table', children=[
+                html.P("Green square"), html.P("start node"),
+                html.P("Purple"), html.P("node with lowest distance from start node, so the algorithm currently considers its neighbours"),
+                html.P("Blue"), html.P("node has been considered"),
+                html.P("Orange"), html.P("neighbours of the purple node that are currently being considered"),
+                html.P("Grey nodes"), html.P("nodes that haven't been looked at"),
+                html.P("Grey edges"), html.P("edges that either haven't been looked at or are not part of any shortest path")
+            ])]),
 
-            html.Div(id='show-div-content')
-            ])
+        html.Hr(),
+
+        html.H2('Network information'),
+        html.Div(id='network-statistics-dijkstra'),
+        html.Div(id='network-statistics-prim'),
+
+        html.Hr(),
+
+        html.P('Draw network graph:', style={'display': 'inline'}),
+        dcc.RadioItems(id='draw-network-radio',
+                       options=[{'label': 'yes', 'value': 'yes'}, {'label': 'no', 'value': 'no'}],
+                       value='no', style={'display': 'inline'}),
+        html.Div(id='network', style={'display': 'none'}, children=[
+            html.P('Layout:', style={'width': '55px', 'display': 'inline-block'}),
+            dcc.Dropdown(id='network-layout-dropdown',
+                         options=[{'label': x, 'value': x} for x in network_layouts],
+                         value=network_layouts[0],
+                         style={'width': '80%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+            dcc.Loading(html.Div(id='network-graph'))
+        ]),
+    ])
 
 
 #############
@@ -383,7 +415,7 @@ def extend_dynamic_graph(dynamic_graph, data, lines):
                         if prev_iter[node] is None:
                             marker_color = 'red'
                         else:
-                            marker_color = ['blue', 'yellow']
+                            marker_color = ['blue', 'green']
 
                         change_marker = go.Scatter(
                             x=[l + (i*DELTA_T), l + (i*DELTA_T)],
@@ -392,18 +424,18 @@ def extend_dynamic_graph(dynamic_graph, data, lines):
                             text='Change in iteration: ' + str(int(l/DELTA_T+i)),
                             mode='markers',
                             marker=dict(
-                                size=10,
+                                size=MARKER_SIZE,
                                 color=marker_color
                             )
                         )
                         dynamic_graph['props']['figure']['data'].append(change_marker)
-                        opacity = 1
-                    if opacity == 1 or i % lines == 0:
+                        opacity = MAX_OPACITY
+                    if opacity == MAX_OPACITY or i % lines == 0:
                         color = get_color(int(iteration[node]))
                         edge_trace = go.Scatter(
                             x=[l + (i*DELTA_T), l + (i*DELTA_T) + 1],
                             y=[iteration[node], int(node)],
-                            line=dict(width=3, color=color),
+                            line=dict(width=LINE_WIDTH, color=color),
                             hoverinfo='text',
                             text='[' + str(iteration[node]) + ',' + str(node) + ']',
                             mode='lines',
@@ -459,13 +491,17 @@ def column(matrix, i):
 #########################
 @app.callback([Output('input-panel', 'style'),
                Output('hide-input-panel-button', 'className'),
-               Output('content', 'className')],
+               Output('hide-input-panel-msg', 'title'),
+               Output('content', 'className'),
+               Output('cytoscape-network-animation', 'style')],
               [Input('hide-input-panel-button', 'n_clicks')])
 def hide_input_panel(n_clicks):
     if n_clicks % 2 != 0:
-        return {'display': 'none'}, 'fas fa-chevron-right', 'content_hidden'
+        return {'display': 'none'}, 'fas fa-chevron-right', 'Show input panel', 'content_hidden', \
+               {'width': '100%', 'height': '600px'}
     else:
-        return {}, 'fas fa-chevron-left', 'content'
+        return {}, 'fas fa-chevron-left', 'Hide input panel', 'content', \
+               {'width': '99%', 'height': '600px'}
 
 
 # Callback functions; functions that execute when something is changed
@@ -496,7 +532,7 @@ def load_data(contents, filenames, datasets, options):
             datasets.extend([data])
             count += 1
 
-        return childrenUplMess, datasets, options, options[0]['value']
+        return childrenUplMess, datasets, options, options[-1]['value']
 
     return html.Div(['No dataset is uploaded.']), [], [], ""
 
@@ -532,11 +568,12 @@ def set_algorithm_value(available_options):
 
 
 @app.callback([Output('dijkstra-settings', 'style'),
-               Output('bellman-ford-settings', 'style'),
-               Output('floyd-warshall-settings', 'style'),
+               # Output('bellman-ford-settings', 'style'),
+               # Output('floyd-warshall-settings', 'style'),
                Output('prim-settings', 'style'),
-               Output('kruskal-settings', 'style'),
-               Output('ford-fulkerson-settings', 'style')],
+               # Output('kruskal-settings', 'style'),
+               # Output('ford-fulkerson-settings', 'style'),
+               ],
               [Input('algorithm-dropdown', 'value')])
 def show_settings(selected_algorithm):
     alg_names = [x for y in algorithms.values() for x in y]
@@ -566,6 +603,7 @@ def set_dijkstra_start_options(style, i, datasets):
         G1 = createDiGraph(df, "")
         info = html.Div([html.P('Number of nodes: ' + str(G1.number_of_nodes())),
                       html.P('Number of edges: ' + str(G1.number_of_edges()))])
+
         return [{'label': str(x), 'value': x} for x in sorted(G1.nodes)], info
 
 
@@ -751,6 +789,7 @@ def dijkstra(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column
 
             return alg_output, [], [alg_output[2]], dijkstra_data, []
         else:
+            time.sleep(0.5)
             run = list(dijkstra_data.keys())[-1]
 
             Q, dist, prev, neighs = prev_data
@@ -821,7 +860,7 @@ def iter_dijkstra(Q, dist, prev, neighs, iterations, dynamic, i):
                         'memory': memory_used,
                         'Q': Q,
                         'u': u,
-                        'v': neighs_u[0][0],
+                        'v': v_inf[0],
                         'neighs_u': column(neighs_u,0),
                         'dist': dist.copy(),
                         'prev': prev.copy()})
@@ -898,6 +937,7 @@ def prim(n_clicks, time_stamp, datasets, start, weight, i, use_weight_column, pr
 
             return init_prim(G, start), [], [], prim_data, []
         else:
+            time.sleep(0.5)
             run = list(prim_data.keys())[-1]
 
             Q, dist, prev, neighs, MST = prev_data
@@ -968,9 +1008,9 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, i):
                     iterations.append([len(iterations), t_elapsed, memory_used])
                     iter_data.append({'t': t_elapsed,
                             'memory': memory_used,
-                            'Q': Q,
+                            'Q': Q.copy(),
                             'u': u,
-                            'v': neighs_u[0][0],
+                            'v': neighbor[0],
                             'neighs_u': column(neighs_u,0),
                             'dist': dist.copy(),
                             'prev': prev.copy()})
@@ -1217,10 +1257,22 @@ def show_network(draw_network, layout, i, df_name, datasets):
         return {}, [html.H3(df_name), cyto.Cytoscape(
             id='cytoscape-layout-1',
             elements=elements,
-            style={'width': '100%', 'height': '350px'},
+            stylesheet=[
+                {'selector': 'edge',
+                 'style': {
+                     'width': '2',
+                     # 'content': 'data(label)',
+                     'curve-style': 'bezier'}
+                 },
+                {'selector': 'node',
+                 'style': {
+                     'content': 'data(label)'}
+                 }
+            ],
+            style={'width': '99%', 'height': '350px'},
             layout={
                 'name': layout,
-                'animate': True
+                'animate': True,
             })]
     else:
         return {'display': 'none'}, []
@@ -1250,13 +1302,24 @@ def set_algorithm_runs_dropdown_value(options):
 
 
 @app.callback(Output('cytoscape-network-animation', 'layout'),
-              [Input('animation-network-layout-dropdown', 'value')],
+              [Input('animation-network-layout-dropdown', 'value'),
+               Input('hide-input-panel-button', 'n_clicks')],
               [State('network-animation', 'children')])
-def set_animation_network_layout(layout, cur_animation):
+def set_animation_network_layout(layout, n_clicks, cur_animation):
     if cur_animation is None:
         raise PreventUpdate
 
+    # triggers = [trigger['prop_id'] for trigger in dash.callback_context.triggered]
+    # if 'hide-input-panel-button.n_clicks' in triggers:
+    #     return {'name': layout, 'animate': True, 'fit': True, 'padding': 3}
+
     return {'name': layout, 'animate': True}
+
+
+@app.callback(Output('output-container-range-slider', 'children'),
+            [Input('iteration-range-slider', 'value')])
+def update_output(value):
+    return 'You have selected "{}"'.format(value)
 
 
 @app.callback(Output('network-animation', 'children'),
@@ -1285,21 +1348,28 @@ def draw_full_animation_network(run_name, run_data, datasets, layout):
              for _, row in df[['source', 'target', weight]].iterrows()]
     elements.extend(edges)
 
+    stylesheet = [{'selector': 'edge',
+                   'style': {
+                       'width': '2',
+                       'content': 'data(label)',
+                       'curve-style': 'bezier'}},
+                  {'selector': 'node',
+                   'style': {
+                       'content': 'data(label)'}}]
+
+    if 'dijkstra' in run_name.lower():
+        stylesheet.append({'selector': 'edge', 'style': {'target-arrow-shape': 'triangle'}})
+
     return cyto.Cytoscape(
         id='cytoscape-network-animation',
         elements=elements,
         layout={'name': layout, 'animate': True},
+        zoom=1,
+        minZoom=0.2,
+        maxZoom=5,
+        boxSelectionEnabled=True,
         style={'width': 'auto', 'height': '600px'},
-        stylesheet=[
-            {'selector': 'edge',
-             'style': {
-                 'content': 'data(label)'}
-             },
-            {'selector': 'node',
-             'style': {
-                 'content': 'data(label)'}
-             }
-        ]
+        stylesheet=stylesheet
     )
 
 
@@ -1403,10 +1473,10 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
     if None in (run_name, run_data, iteration_range, datasets) or run_data[run_name]['iterations'] == []:
         raise PreventUpdate
 
-    COL_VISITED = '#2980B9'
-    COL_UNVISITED = '#95A5A6'
-    COL_CURRENT_NODE = '#D35400'
-    COL_CONSIDERING = '#DC7633'
+    COL_VISITED = '#2980B9'  # blue
+    COL_UNVISITED = '#95A5A6'  # grey
+    COL_CURRENT_NODE = 'purple'
+    COL_CONSIDERING = '#DC7633'  # orange
 
     i = int(iteration_range[1])  # iteration_range = (min, value, max)
 
@@ -1424,18 +1494,38 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
         df['weight'] = 1  # list of ones
         weight = 'weight'
 
+    if 'prim' in run_name.lower():  # add all edges from target to source, because the graph is undirected
+        df_rev = pd.DataFrame({'source': df['target'], 'target': df['source'], 'weight': df['weight']})
+        df = df.append(df_rev, ignore_index=True)
+
     nodes_visited = [str(node) for node, dist in iteration["dist"].items() if dist != 'inf']
     nodes_unvisited = [str(node) for node, dist in iteration["dist"].items() if dist == 'inf']
-    # assumption only one entry of edge (x,y) in a dataset
-    try:
-        edges_visited = [{'id': "{}-{}".format(int(src), int(tg)),
-                          'weight': df[(df['source'] == int(src)) & (df['target'] == int(tg))][weight].iloc[0]
-                          } for tg, src in iteration['prev'].items() if src is not None]
-    except Exception as e:
-        print(e)
+
+    edges_visited = [{'id': "{}-{}".format(int(src), int(tg)),
+                      'weight': df[(df['source'] == int(src)) & (df['target'] == int(tg))][weight].iloc[0]
+                      } for tg, src in iteration['prev'].items() if src is not None]
     edges_unvisited = ["{}-{}".format(src, tg) for tg, src in iteration['prev'].items() if src is None]
 
-    stylesheet = []
+    if 'prim'in run_name.lower():  # add all edges from target to source, because the graph is undirected
+        edges_visited.extend([{'id': "{}-{}".format(int(tg), int(src)),
+                               'weight': df[(df['source'] == int(src)) & (df['target'] == int(tg))][weight].iloc[0]
+                               } for tg, src in iteration['prev'].items() if src is not None])
+        edges_unvisited.extend(["{}-{}".format(tg, src) for tg, src in iteration['prev'].items() if src is None])
+
+    if 'dijkstra' in run_name.lower():
+        stylesheet = [{'selector': 'edge',
+                       'style': {
+                           # 'content': 'data(label)',
+                           'curve-style': 'bezier',
+                           'target-arrow-shape': 'triangle'
+                       }}]
+    else:
+        stylesheet = [{'selector': 'edge',
+                       'style': {
+                           # 'content': 'data(label)',
+                           'curve-style': 'bezier'
+                       }}]
+
     stylesheet.extend([  # visited nodes
         {'selector': '#' + node_id,
          'style': {
@@ -1453,14 +1543,18 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
     stylesheet.extend([  # visited edges
         {'selector': '#{}'.format(edge['id']),
          'style': {
+             'width': 5,
              'content': edge['weight'],
+             'target-arrow-color': COL_VISITED,
              'line-color': COL_VISITED}
          } for edge in edges_visited
     ])
     stylesheet.extend([  # unvisited edges
         {'selector': '#{}'.format(edge_id),
          'style': {
+             'width': 2,
              'content': 'inf',
+             'target-arrow-color': COL_UNVISITED,
              'line-color': COL_UNVISITED}
          } for edge_id in edges_unvisited
     ])
@@ -1468,34 +1562,44 @@ def draw_animation_iteration(iteration_range, run_data, run_name, datasets):
     stylesheet.append({
         'selector': '#{}'.format(start),
         'style': {
+            'background-color': 'darkgreen',
             'shape': 'rectangle'}})
     stylesheet.append({
         'selector': '#{}'.format(iteration['u']),
         'style': {
             'background-color': COL_CURRENT_NODE}})
-    stylesheet.append({  # current node u
-        'selector': '#{}'.format(iteration['v']),
-        'style': {
-            'background-color': COL_CONSIDERING}
-    })
+    stylesheet.extend([  # current node u
+        {'selector': '#{}'.format(neighbor),
+         'style': {
+             'background-color': COL_CONSIDERING}
+         } for neighbor in iteration['neighs_u']
+    ])
     stylesheet.append({  # edges from u to neighbours that are still in Q
         'selector': '#{}-{}'.format(iteration['u'], iteration['v']),
         'style': {
+            'width': 10,
+            'target-arrow-color': COL_CONSIDERING,
             'line-color': COL_CONSIDERING}
     })
     return stylesheet
 
 
+@app.callback([Output('animation-legend-table', 'style'),
+               Output('hide-legend-button', 'className')],
+              [Input('hide-legend-button', 'n_clicks')])
+def hide_legend(n_clicks):
+    if n_clicks % 2 == 0:
+        return {'display': 'none'}, 'fas fa-chevron-down'
+    else:
+        return {}, 'fas fa-chevron-up'
+
+
 ##############
 # APP LAYOUT #
 ##############
-app.layout = html.Div(className='main', children=[
+app.layout = html.Div(className='main', id='main', children=[
     # Header
-    html.Div(className='header', children=[
-        html.I(id='hide-input-panel-button', n_clicks=0,
-               style={'font-size': '24px', 'align': 'bottom', 'cursor': 'pointer'}),
-        html.H1("Title bar"),
-    ]),
+    create_header(),
 
     # Content
     html.Div(className='content', id='content', children=[

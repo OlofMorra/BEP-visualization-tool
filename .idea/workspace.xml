@@ -2,9 +2,27 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/BEP-visualization-tool.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BEP-visualization-tool.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/R_User_Library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/R_User_Library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data Demo/Icon&#10;" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data/Icon&#10;" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms2.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app2.py" beforeDir="false" afterPath="$PROJECT_DIR$/app2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_presentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_presentation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_presentation.py.orig" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,118 +51,12 @@
   <component name="FavoritesManager">
     <favorites_list name="BEP-visualization-tool" />
   </component>
-  <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app_presentation.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="396">
-              <caret line="403" column="69" lean-forward="true" selection-start-line="403" selection-start-column="69" selection-end-line="403" selection-end-column="69" />
-              <folding>
-                <element signature="e#24#35#0" expanded="true" />
-                <element signature="e#8156#11397#0" />
-                <element signature="e#11491#13014#0" />
-                <element signature="e#13052#13109#0" />
-                <element signature="e#13147#13356#0" />
-                <element signature="e#13392#13599#0" />
-                <element signature="e#16373#16893#0" />
-                <element signature="e#16928#17018#0" />
-                <element signature="e#17048#17081#0" />
-                <element signature="e#17176#17318#0" />
-                <element signature="e#17418#17578#0" />
-                <element signature="e#17666#17853#0" />
-                <element signature="e#17920#18050#0" />
-                <element signature="e#18111#18778#0" />
-                <element signature="e#18915#19053#0" />
-                <element signature="e#19124#19228#0" />
-                <element signature="e#19423#19553#0" />
-                <element signature="e#19713#19848#0" />
-                <element signature="e#19865#20179#0" />
-                <element signature="e#20278#20598#0" />
-                <element signature="e#20601#20621#0" />
-                <element signature="e#20688#20800#0" />
-                <element signature="e#21005#21541#0" />
-                <element signature="e#21706#21865#0" />
-                <element signature="e#21943#22031#0" />
-                <element signature="e#22133#22414#0" />
-                <element signature="e#22322#22414#0" />
-                <element signature="e#22431#22536#0" />
-                <element signature="e#22720#22987#0" />
-                <element signature="e#22990#23006#0" />
-                <element signature="e#23073#23177#0" />
-                <element signature="e#23193#23277#0" />
-                <element signature="e#23374#23968#0" />
-                <element signature="e#23615#23968#0" />
-                <element signature="e#24121#24288#0" />
-                <element signature="e#24153#24250#0" />
-                <element signature="e#24362#24446#0" />
-                <element signature="e#24544#24850#0" />
-                <element signature="e#24867#24964#0" />
-                <element signature="e#25136#25403#0" />
-                <element signature="e#30951#31077#0" />
-                <element signature="e#31094#31337#0" />
-                <element signature="e#32419#32945#0" />
-                <element signature="e#32129#33618#0" />
-                <element signature="e#33650#34159#0" />
-                <element signature="e#40731#40830#0" />
-                <element signature="e#41022#41535#0" />
-                <element signature="e#41766#41978#0" />
-                <element signature="e#43473#44034#0" />
-                <element signature="e#44050#44485#0" />
-                <element signature="e#44528#44867#0" />
-                <element signature="e#45016#45145#0" />
-                <element signature="e#45161#45262#0" />
-                <element signature="e#45322#45349#0" />
-                <element signature="e#45771#46568#0" />
-                <element signature="e#46734#46857#0" />
-                <element signature="e#47031#47291#0" />
-                <element signature="e#47543#47642#0" />
-                <element signature="e#47996#49336#0" />
-                <element signature="e#49626#49824#0" />
-                <element signature="e#49957#50350#0" />
-                <element signature="e#50643#52396#0" />
-                <element signature="e#52701#53259#0" />
-                <element signature="e#53412#53446#0" />
-                <element signature="e#53807#56947#0" />
-                <element signature="e#57044#57636#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
-  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
       </list>
     </option>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>prevent</find>
-      <find>saved-vis-graphs</find>
-      <find>int</find>
-      <find>dijkstra</find>
-      <find>prim</find>
-      <find>vis-graphs</find>
-      <find>prim-dropdown</find>
-      <find>saved-vis</find>
-      <find>dijkstra_graphs</find>
-      <find>saved</find>
-      <find>storage_typ</find>
-      <find>loading-data</find>
-      <find>dataset-dropdown</find>
-      <find>network-statis</find>
-      <find>draw-network-radio</find>
-      <find>dijkstra-graph</find>
-      <find>pri</find>
-      <find>print</find>
-    </findStrings>
-    <replaceStrings>
-      <replace>prim</replace>
-    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
@@ -163,66 +75,16 @@
     </option>
     <option name="RESET_MODE" value="HARD" />
   </component>
-  <component name="IdeDocumentHistory">
-    <option name="CHANGED_PATHS">
-      <list>
-        <option value="$PROJECT_DIR$/dijkstra.py" />
-        <option value="$PROJECT_DIR$/shortest_path_algorithms.py" />
-        <option value="$PROJECT_DIR$/example_data.py" />
-        <option value="$PROJECT_DIR$/ExampleData.py" />
-        <option value="$PROJECT_DIR$/app_test.py" />
-        <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/testApp.py" />
-        <option value="$PROJECT_DIR$/requirements.txt" />
-        <option value="$PROJECT_DIR$/algorithms2.py" />
-        <option value="$PROJECT_DIR$/algorithms.py" />
-        <option value="$PROJECT_DIR$/app.py" />
-        <option value="$PROJECT_DIR$/Test.py" />
-        <option value="$PROJECT_DIR$/assets/style.css" />
-        <option value="$PROJECT_DIR$/app2.py" />
-        <option value="$PROJECT_DIR$/app_presentation.py" />
-      </list>
-    </option>
-  </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="47" />
+  <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="1512" />
+    <option name="width" value="1440" />
     <option name="height" value="877" />
   </component>
-  <component name="ProjectView">
-    <navigator proportions="" version="1">
-      <foldersAlwaysOnTop value="true" />
-    </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="BEP-visualization-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="BEP-visualization-tool" type="462c0819:PsiDirectoryNode" />
-              <item name="Data Demo" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
-  </component>
+  <component name="ProjectId" id="1SHyrOHM8QIHd4jvCCOCXH7U032" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/Data Demo" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -264,7 +126,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -321,7 +183,17 @@
       <workItem from="1561552147235" duration="4727000" />
       <workItem from="1561888617181" duration="15219000" />
       <workItem from="1561966931878" duration="15379000" />
-      <workItem from="1562076237006" duration="21108000" />
+      <workItem from="1562076237006" duration="23239000" />
+      <workItem from="1563104108845" duration="6125000" />
+      <workItem from="1570456474997" duration="1509000" />
+      <workItem from="1571231843925" duration="11000" />
+      <workItem from="1571231954030" duration="876000" />
+      <workItem from="1571235021209" duration="473000" />
+      <workItem from="1572120587959" duration="1179000" />
+      <workItem from="1572526981665" duration="445000" />
+      <workItem from="1574165614451" duration="166000" />
+      <workItem from="1576354387467" duration="13000" />
+      <workItem from="1588156800250" duration="1350000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
@@ -417,9 +289,6 @@
     <option name="localTasksCounter" value="14" />
     <servers />
   </component>
-  <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="257955000" />
-  </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
       <is-autoscroll-to-source value="true" />
@@ -428,62 +297,6 @@
       <are-packages-shown value="true" />
       <is-autoscroll-to-source value="true" />
     </todo-panel>
-  </component>
-  <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
-    <editor active="true" />
-    <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49808916" visible="true" weight="0.10300429" />
-      <window_info id="Structure" order="1" sideWeight="0.5019108" side_tool="true" visible="true" weight="0.10300429" />
-      <window_info id="Favorites" order="2" sideWeight="0.5007924" side_tool="true" weight="0.15884861" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.20127389" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39978212" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50061053" side_tool="true" weight="0.2684492" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4993895" weight="0.22032085" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" weight="0.32967034" />
-      <window_info anchor="right" id="R Graphics" order="4" weight="0.32967034" />
-      <window_info anchor="right" id="R Packages" order="5" weight="0.32967034" />
-      <window_info anchor="right" id="Database" order="6" weight="0.32967034" />
-      <window_info anchor="right" id="Version Control" order="7" sideWeight="0.5005348" side_tool="true" weight="0.24908425" />
-      <window_info anchor="right" x="0" y="0" width="310" height="700" id="Documentation" order="8" side_tool="true" weight="0.3297568" />
-      <window_info active="true" anchor="right" id="Terminal" order="9" sideWeight="0.49946523" visible="true" weight="0.2918455" />
-    </layout>
-    <layout-to-restore>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49920762" visible="true" weight="0.108726755" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" sideWeight="0.5007924" side_tool="true" weight="0.15884861" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.20127389" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39978212" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.22038217" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" weight="0.32967034" />
-      <window_info anchor="right" id="R Graphics" order="4" weight="0.32967034" />
-      <window_info anchor="right" id="R Packages" order="5" weight="0.32967034" />
-      <window_info anchor="right" id="Database" order="6" weight="0.32967034" />
-      <window_info anchor="right" id="Version Control" order="7" side_tool="true" weight="0.32539684" />
-      <window_info anchor="right" x="0" y="0" width="310" height="700" id="Documentation" order="8" side_tool="true" weight="0.3297568" />
-      <window_info anchor="right" id="Terminal" order="9" visible="true" weight="0.35622317" />
-    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -494,26 +307,13 @@
         <entry key="MAIN">
           <value>
             <State>
-              <option name="RECENTLY_FILTERED_USER_GROUPS">
-                <collection />
-              </option>
-              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
-                <collection />
-              </option>
               <option name="COLUMN_WIDTH">
                 <map>
                   <entry key="2" value="69" />
                   <entry key="3" value="78" />
                 </map>
               </option>
-              <option name="COLUMN_ORDER">
-                <list>
-                  <option value="0" />
-                  <option value="1" />
-                  <option value="2" />
-                  <option value="3" />
-                </list>
-              </option>
+              <option name="COLUMN_ORDER" />
             </State>
           </value>
         </entry>
@@ -549,141 +349,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="Adding rangeslider for time series&#10;&#10;Now there is a possibility of selecting specific time frames, hence, get a more detailed overview of the time per step or memory used per step." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/BEP_visualization_tool$app2.coverage" NAME="app2 Coverage Results" MODIFIED="1560169806644" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-  </component>
-  <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app_test.py" />
-    <entry file="file://$PROJECT_DIR$/ExampleData.py" />
-    <entry file="file://$PROJECT_DIR$/testApp.py" />
-    <entry file="file://$PROJECT_DIR$/requirements.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Test.py" />
-    <entry file="file://$PROJECT_DIR$/assets/style.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="813">
-          <caret line="81" column="17" selection-start-line="81" selection-start-column="17" selection-end-line="81" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/algorithms2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="19" selection-start-line="29" selection-start-column="19" selection-end-line="29" selection-end-column="19" />
-          <folding>
-            <element signature="e#235#254#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/algorithms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="880">
-          <caret line="106" column="61" selection-start-line="106" selection-start-column="61" selection-end-line="106" selection-end-column="61" />
-          <folding>
-            <element signature="e#235#254#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="538" column="30" selection-start-line="538" selection-start-column="30" selection-end-line="538" selection-end-column="30" />
-          <folding>
-            <element signature="e#24#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app_presentation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="403" column="69" lean-forward="true" selection-start-line="403" selection-start-column="69" selection-end-line="403" selection-end-column="69" />
-          <folding>
-            <element signature="e#24#35#0" expanded="true" />
-            <element signature="e#8156#11397#0" />
-            <element signature="e#11491#13014#0" />
-            <element signature="e#13052#13109#0" />
-            <element signature="e#13147#13356#0" />
-            <element signature="e#13392#13599#0" />
-            <element signature="e#16373#16893#0" />
-            <element signature="e#16928#17018#0" />
-            <element signature="e#17048#17081#0" />
-            <element signature="e#17176#17318#0" />
-            <element signature="e#17418#17578#0" />
-            <element signature="e#17666#17853#0" />
-            <element signature="e#17920#18050#0" />
-            <element signature="e#18111#18778#0" />
-            <element signature="e#18915#19053#0" />
-            <element signature="e#19124#19228#0" />
-            <element signature="e#19423#19553#0" />
-            <element signature="e#19713#19848#0" />
-            <element signature="e#19865#20179#0" />
-            <element signature="e#20278#20598#0" />
-            <element signature="e#20601#20621#0" />
-            <element signature="e#20688#20800#0" />
-            <element signature="e#21005#21541#0" />
-            <element signature="e#21706#21865#0" />
-            <element signature="e#21943#22031#0" />
-            <element signature="e#22133#22414#0" />
-            <element signature="e#22322#22414#0" />
-            <element signature="e#22431#22536#0" />
-            <element signature="e#22720#22987#0" />
-            <element signature="e#22990#23006#0" />
-            <element signature="e#23073#23177#0" />
-            <element signature="e#23193#23277#0" />
-            <element signature="e#23374#23968#0" />
-            <element signature="e#23615#23968#0" />
-            <element signature="e#24121#24288#0" />
-            <element signature="e#24153#24250#0" />
-            <element signature="e#24362#24446#0" />
-            <element signature="e#24544#24850#0" />
-            <element signature="e#24867#24964#0" />
-            <element signature="e#25136#25403#0" />
-            <element signature="e#30951#31077#0" />
-            <element signature="e#31094#31337#0" />
-            <element signature="e#32419#32945#0" />
-            <element signature="e#32129#33618#0" />
-            <element signature="e#33650#34159#0" />
-            <element signature="e#40731#40830#0" />
-            <element signature="e#41022#41535#0" />
-            <element signature="e#41766#41978#0" />
-            <element signature="e#43473#44034#0" />
-            <element signature="e#44050#44485#0" />
-            <element signature="e#44528#44867#0" />
-            <element signature="e#45016#45145#0" />
-            <element signature="e#45161#45262#0" />
-            <element signature="e#45322#45349#0" />
-            <element signature="e#45771#46568#0" />
-            <element signature="e#46734#46857#0" />
-            <element signature="e#47031#47291#0" />
-            <element signature="e#47543#47642#0" />
-            <element signature="e#47996#49336#0" />
-            <element signature="e#49626#49824#0" />
-            <element signature="e#49957#50350#0" />
-            <element signature="e#50643#52396#0" />
-            <element signature="e#52701#53259#0" />
-            <element signature="e#53412#53446#0" />
-            <element signature="e#53807#56947#0" />
-            <element signature="e#57044#57636#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7875">
-          <caret line="547" column="24" selection-start-line="547" selection-start-column="24" selection-end-line="547" selection-end-column="24" />
-          <folding>
-            <element signature="e#24#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <SUITE FILE_PATH="coverage/BEP_visualization_tool$app2.coverage" NAME="app2 Coverage Results" MODIFIED="1572120631512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
