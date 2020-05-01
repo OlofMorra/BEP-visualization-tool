@@ -6,7 +6,7 @@ import dash_cytoscape as cyto
 from dash.dependencies import Input, Output, State
 import dash_table
 from dash.exceptions import PreventUpdate
-import plotly.plotly as py
+#import plotly.plotly as py
 import plotly.graph_objs as go
 
 import pandas as pd
