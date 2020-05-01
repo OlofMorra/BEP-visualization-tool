@@ -2,29 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/BEP-visualization-tool.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BEP-visualization-tool.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/R_User_Library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/R_User_Library.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data Demo/Icon&#10;" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/Icon&#10;" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms2.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app2.py" beforeDir="false" afterPath="$PROJECT_DIR$/app2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_presentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_presentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_presentation.py.orig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -99,18 +80,6 @@
       <recent name="$PROJECT_DIR$" />
       <recent name="C:\Users\s164518\Documents\GitHub\BEP-visualization-tool" />
     </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="RunManager">
     <configuration name="app2" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -313,7 +282,6 @@
                   <entry key="3" value="78" />
                 </map>
               </option>
-              <option name="COLUMN_ORDER" />
             </State>
           </value>
         </entry>
@@ -333,6 +301,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working." />
