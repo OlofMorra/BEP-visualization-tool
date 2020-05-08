@@ -63,7 +63,6 @@ class Dijkstra:
 
         return Q, dist, prev
 
-
     def iter_dijkstra(self, Q, dist, prev):
         if Q is not None:
             dist_u, u = heappop(Q)  # extract minimum, maintaining min heap property

@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app2.py" beforeDir="false" afterPath="$PROJECT_DIR$/app2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Data Demo/Olof/US_airline_small.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms2.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_presentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_presentation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,25 +58,23 @@
     </option>
     <option name="RESET_MODE" value="HARD" />
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="1440" />
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="877" />
-  </component>
   <component name="ProjectId" id="1SHyrOHM8QIHd4jvCCOCXH7U032" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -170,6 +170,8 @@
       <workItem from="1588156800250" duration="1733000" />
       <workItem from="1588158958522" duration="288000" />
       <workItem from="1588328368050" duration="289000" />
+      <workItem from="1588931061679" duration="25000" />
+      <workItem from="1588931124940" duration="6542000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
@@ -311,6 +313,7 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working." />
     <MESSAGE value="Loading data&#10;&#10;Made sure that input can be read, it automatically detects a .csv or .xls file, however, it is not fault proof yet for people who have xls or csv in the filename itself." />
     <MESSAGE value="Titel&#10;&#10;tekst" />
@@ -324,7 +327,45 @@
     <MESSAGE value="Adding rangeslider for time series&#10;&#10;Now there is a possibility of selecting specific time frames, hence, get a more detailed overview of the time per step or memory used per step." />
     <option name="LAST_COMMIT_MESSAGE" value="Adding rangeslider for time series&#10;&#10;Now there is a possibility of selecting specific time frames, hence, get a more detailed overview of the time per step or memory used per step." />
   </component>
+  <component name="WindowStateProjectService">
+    <state width="1878" height="357" key="GridCell.Tab.0.bottom" timestamp="1588939724584">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.0.bottom/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724584" />
+    <state width="1878" height="357" key="GridCell.Tab.0.center" timestamp="1588939724583">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.0.center/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724583" />
+    <state width="1878" height="357" key="GridCell.Tab.0.left" timestamp="1588939724582">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.0.left/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724582" />
+    <state width="1878" height="357" key="GridCell.Tab.0.right" timestamp="1588939724584">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.0.right/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724584" />
+    <state width="1878" height="357" key="GridCell.Tab.1.bottom" timestamp="1588939724586">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.1.bottom/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724586" />
+    <state width="1878" height="357" key="GridCell.Tab.1.center" timestamp="1588939724585">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.1.center/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724585" />
+    <state width="1878" height="357" key="GridCell.Tab.1.left" timestamp="1588939724584">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.1.left/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724584" />
+    <state width="1878" height="357" key="GridCell.Tab.1.right" timestamp="1588939724585">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state width="1878" height="357" key="GridCell.Tab.1.right/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588939724585" />
+    <state x="-1451" y="190" key="SettingsEditor" timestamp="1588932557329">
+      <screen x="-1920" y="23" width="1920" height="1057" />
+    </state>
+    <state x="-1451" y="190" key="SettingsEditor/0.23.1440.877/-1920.23.1920.1057@-1920.23.1920.1057" timestamp="1588932557329" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/BEP_visualization_tool$app2.coverage" NAME="app2 Coverage Results" MODIFIED="1572120631512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BEP_visualization_tool$app2.coverage" NAME="app2 Coverage Results" MODIFIED="1588939715389" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
