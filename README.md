@@ -9,10 +9,11 @@ The reason that this does not work well, is that the cache of the browser is lim
 ## Explanation files
 [app.py](app.py) is an old deprecated version.
 
-[app2.py](app2.py) version with which the paper visualizations are made, it does not work at the moment due to deprecated packages.
+[app2.py](app2.py) is an old and deprecated version.
 
 [app_presentation.py](app_presentation.py) version used for presentation, [app2.py](app2.py) is more extensive and can handle larger files. 
-This version does work now for small files (10 nodes or so)
+This version does work now with dash 1.9.1. An example data
+file which works is [V200E3.csv](Data%20Demo/Olof/V200E3.csv)
 
 [Data demo](Data%20Demo) contains small datasets used
 

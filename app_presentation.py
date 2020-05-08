@@ -726,7 +726,6 @@ def set_prim_weight_value(use_weight_column, options):
 @app.callback(Output('dijkstra-run-button', 'n_clicks'),
               [Input('dijkstra-info', 'data')])
 def end_dijkstra(data):
-    print("Data:" + data.__str__())
     if data in (None, []):
         raise PreventUpdate
     elif data[0][0][0] is None:
@@ -1037,9 +1036,9 @@ def iter_prim(Q, dist, prev, neighs, MST, iterations, i):
 def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
                         dijkstra_dynamic_graph_data, prim_graph_data,
                         prim_dynamic_graph_data, graph_types, lines):
-    print("Properties: " + dash.callback_context.triggered.__str__())
     if lines == 0:
         lines = float('inf')
+
     if 'dijkstra' in dash.callback_context.triggered[0]['prop_id']:
         graph_data = dijkstra_graph_data
         dynamic_graph_data = dijkstra_dynamic_graph_data
@@ -1051,9 +1050,6 @@ def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
     else:
         raise PreventUpdate
 
-
-    print("Graph data: " + graph_data.__str__())
-    print("Graph data: " + dynamic_graph_data.__str__())
     if graph_data is not None:
         if not graph_data:
             if current_graphs is None:
@@ -1083,22 +1079,18 @@ def add_graphs(t1, t2, current_graphs, dijkstra_graph_data,
                                                         ylab='Memory (mb)',
                                                         run=run)
         else:
-            print("Graphs: " + current_graphs.__str__())
-            if current_graphs is not None:
-                run = int(current_graphs[-1]['props']['id'][-1])
-                if 'Memory' in graph_types and 'Time' in graph_types:
-                    current_graphs = current_graphs[:-2]
-                elif 'Memory' in graph_types or 'Time' in graph_types:
-                    current_graphs = current_graphs[:-1]
+            run = int(current_graphs[-1]['props']['id'][-1])
+            if 'Memory' in graph_types and 'Time' in graph_types:
+                current_graphs = current_graphs[:-2]
+            elif 'Memory' in graph_types or 'Time' in graph_types:
+                current_graphs = current_graphs[:-1]
 
-                if 'Dynamic' in graph_types:
-                    current_graphs[-1] = extend_dynamic_graph(
-                        current_graphs[-1],
-                        data=dynamic_graph_data,
-                        lines=lines
-                    )
-            else:
-                run = 1
+            if 'Dynamic' in graph_types:
+                current_graphs[-1] = extend_dynamic_graph(
+                    current_graphs[-1],
+                    data=dynamic_graph_data,
+                    lines=lines
+                )
 
             length = len(graph_data)
 

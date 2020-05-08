@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="afc510b9-a835-45a3-ad0a-0b2606620342" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Data Demo/Olof/US_airline_small.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms2.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_presentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_presentation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -172,6 +171,7 @@
       <workItem from="1588328368050" duration="289000" />
       <workItem from="1588931061679" duration="25000" />
       <workItem from="1588931124940" duration="6542000" />
+      <workItem from="1588950435079" duration="971000" />
     </task>
     <task id="LOCAL-00001" summary="Created the start of the input panel with some basic CSS and the first input possibilities. Possibility to choose file and split type for reading data. The actual reading of the data is not yet working.">
       <created>1552322502667</created>
